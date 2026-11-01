@@ -35,6 +35,8 @@
   
   .filter-active { background-color: #10B981; color: #0B111E; border-color: #10B981; }
 </style>
+
+<link rel="manifest" href='data:application/manifest+json,{"name":"Trading Journal","short_name":"Journal","start_url":"/trading-journal/","display":"standalone","background_color":"#0B111E","theme_color":"#0B111E","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2933/2933931.png","sizes":"192x192","type":"image/png"}]}'>
 </head>
 <body class="bg-bg text-text font-sans h-screen overflow-hidden flex justify-center transition-colors duration-300">
 
@@ -61,7 +63,7 @@
       
       <!-- Metrics & Chart -->
       <div class="bg-bg/50 backdrop-blur-sm z-10 border-b border-border">
-        <section class="grid grid-cols-4 gap-2 px-4 py-3">
+        <section class="grid grid-cols-5 gap-1.5 px-3 py-3">
           <div class="bg-card border border-border rounded-xl p-2 flex flex-col justify-center shadow-sm">
             <span class="text-[9px] uppercase font-bold text-muted tracking-wider mb-1">Net P&L</span>
             <span id="metric-pnl" class="text-sm md:text-xl font-bold text-text">$0.00</span>
@@ -74,13 +76,29 @@
             <span class="text-[9px] uppercase font-bold text-muted tracking-wider mb-1">Trades</span>
             <span id="metric-count" class="text-sm md:text-xl font-bold text-text">0</span>
           </div>
+          
           <div class="bg-card border border-border rounded-xl p-2 flex flex-col justify-center shadow-sm">
-            <span class="text-[9px] uppercase font-bold text-muted tracking-wider mb-1">Streak</span>
+            <span class="text-[8px] uppercase font-bold text-muted tracking-wider mb-1">Prof. Factor</span>
+            <span id="metric-pf" class="text-sm md:text-xl font-bold text-text">0.0</span>
+          </div>
+<div class="bg-card border border-border rounded-xl p-2 flex flex-col justify-center shadow-sm">
+            <span class="text-[8px] uppercase font-bold text-muted tracking-wider mb-1">Streak</span>
             <span id="metric-streak" class="text-sm md:text-xl font-bold text-text">-</span>
           </div>
         </section>
 
-        <!-- Chart Container -->
+        
+        <!-- Monthly Goal Progress -->
+        <div class="px-4 pb-2">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[10px] font-bold text-muted">Monthly Goal</span>
+            <span class="text-[10px] font-bold text-win cursor-pointer hover:underline" onclick="setGoal()">Edit</span>
+          </div>
+          <div class="w-full bg-border rounded-full h-1.5 overflow-hidden">
+            <div id="goal-bar" class="bg-win h-1.5 rounded-full transition-all duration-500" style="width: 0%;"></div>
+          </div>
+        </div>
+<!-- Chart Container -->
         <div id="chart-container" class="px-4 pb-4 md:px-6 md:pb-6 transition-all duration-300">
           <div class="bg-card border border-border rounded-xl p-3 shadow-sm h-28 md:h-40 relative">
             <canvas id="equityChart"></canvas>
@@ -173,7 +191,18 @@
             </div>
           </div>
 
+          
           <div>
+            <label class="block text-[10px] font-bold text-muted uppercase mb-1">Mistake (Psychology)</label>
+            <select id="input-mistake" class="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-win">
+              <option value="None">None (Followed Plan)</option>
+              <option value="FOMO">FOMO (Chased entry)</option>
+              <option value="Revenge">Revenge Trade</option>
+              <option value="Moved SL">Moved Stop Loss</option>
+              <option value="Overtrading">Overtrading</option>
+            </select>
+          </div>
+<div>
             <label class="block text-[10px] font-bold text-muted uppercase mb-1">Notes / Psychology</label>
             <textarea id="input-notes" rows="2" placeholder="Why did you take this trade?" class="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-win"></textarea>
           </div>
@@ -229,6 +258,9 @@
     const metricWinrate = document.getElementById('metric-winrate');
     const metricCount = document.getElementById('metric-count');
     const metricStreak = document.getElementById('metric-streak');
+    const metricPf = document.getElementById('metric-pf');
+    const goalBar = document.getElementById('goal-bar');
+    let monthlyGoal = parseFloat(localStorage.getItem('gongola_goal')) || 2000;
 
     // Inputs
     const inputAsset = document.getElementById('input-asset');
@@ -324,6 +356,23 @@
       }
     }
 
+    function setGoal() {
+      const current = prompt("Enter your monthly profit goal ($):", monthlyGoal);
+      if (current && !isNaN(current)) {
+        monthlyGoal = parseFloat(current);
+        localStorage.setItem('gongola_goal', monthlyGoal);
+        render();
+      }
+    }
+
+    function duplicateTrade(id) {
+      const trade = trades.find(t => t.id === id);
+      if (trade) {
+        trades.unshift({ ...trade, id: Date.now().toString(), timestamp: new Date().toISOString() });
+        saveData();
+      }
+    }
+
     function deleteTrade(id) {
       if (confirm("Delete this trade?")) {
         trades = trades.filter(t => t.id !== id);
@@ -389,6 +438,7 @@
         amount: amount,
         action: currentAction,
         setup: inputSetup.value,
+        mistake: document.getElementById('input-mistake').value,
         notes: inputNotes.value.trim(),
         timestamp: new Date().toISOString()
       });
@@ -491,6 +541,27 @@
       const wins = trades.filter(t => t.amount > 0).length;
       const winRate = trades.length > 0 ? Math.round((wins / trades.length) * 100) : 0;
       
+      // Calculate Profit Factor
+      const grossWin = trades.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+      const grossLoss = Math.abs(trades.filter(t => t.amount < 0).reduce((sum, t) => sum + t.amount, 0));
+      const pf = grossLoss === 0 ? (grossWin > 0 ? 99.9 : 0) : (grossWin / grossLoss);
+
+      // Calculate Goal Progress
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      const monthPnl = trades.filter(t => {
+        const d = new Date(t.timestamp);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      }).reduce((sum, t) => sum + t.amount, 0);
+      
+      let goalPercent = (monthPnl / monthlyGoal) * 100;
+      if (goalPercent > 100) goalPercent = 100;
+      if (goalPercent < 0) goalPercent = 0;
+      
+      goalBar.style.width = `${goalPercent}%`;
+      if (goalPercent >= 100) goalBar.className = "bg-emerald-400 h-1.5 rounded-full transition-all duration-500 shadow-[0_0_10px_#34d399]";
+      else goalBar.className = "bg-win h-1.5 rounded-full transition-all duration-500";
+
       // Calculate Streak
       let streak = 0;
       let streakType = '';
@@ -508,6 +579,9 @@
       metricWinrate.className = `text-sm md:text-xl font-bold ${winRate >= 50 ? 'text-win' : 'text-loss'}`;
       metricCount.textContent = trades.length;
       
+      metricPf.textContent = pf.toFixed(2);
+      metricPf.className = `text-sm md:text-xl font-bold ${pf >= 1.5 ? 'text-win' : pf >= 1 ? 'text-yellow-400' : 'text-loss'}`;
+
       if (trades.length === 0) {
         metricStreak.textContent = '-';
         metricStreak.className = `text-sm md:text-xl font-bold text-text`;
@@ -540,8 +614,9 @@
           // Build Notes HTML
           let notesHtml = trade.notes ? `<p class="text-[10px] text-muted mt-2 italic bg-bg/50 p-1.5 rounded">"${trade.notes}"</p>` : '';
           
-          // Build Setup HTML
+          // Build Setup & Mistake HTML
           let setupHtml = trade.setup ? `<span class="text-[8px] font-bold bg-border text-text px-1.5 py-0.5 rounded ml-2">${trade.setup}</span>` : '';
+          let mistakeHtml = (trade.mistake && trade.mistake !== 'None') ? `<span class="text-[8px] font-bold bg-loss/20 text-loss border border-loss/30 px-1.5 py-0.5 rounded ml-1">${trade.mistake}</span>` : '';
 
           const card = document.createElement('div');
           card.className = `bg-card border border-border rounded-xl p-3 shadow-sm relative overflow-hidden ${isWin ? 'border-l-4 border-l-win' : 'border-l-4 border-l-loss'}`;
@@ -551,14 +626,20 @@
                 <div class="flex items-center mb-1">
                   <span class="text-xs font-semibold text-muted">${trade.action} · ${trade.asset}</span>
                   ${setupHtml}
+                  ${mistakeHtml}
                 </div>
                 <span class="text-lg font-bold ${isWin ? 'text-win' : 'text-loss'}">${sign}${formatCurrency(trade.amount)}</span>
                 <span class="text-[9px] text-muted mt-0.5 font-mono">${formatTime(trade.timestamp)}</span>
                 ${notesHtml}
               </div>
-              <button onclick="deleteTrade('${trade.id}')" class="p-1.5 text-muted hover:text-loss transition-colors rounded-lg bg-bg border border-border hover:border-loss/30">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              </button>
+              <div class="flex flex-col gap-1">
+                <button onclick="duplicateTrade('${trade.id}')" class="p-1.5 text-muted hover:text-win transition-colors rounded-lg bg-bg border border-border hover:border-win/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </button>
+                <button onclick="deleteTrade('${trade.id}')" class="p-1.5 text-muted hover:text-loss transition-colors rounded-lg bg-bg border border-border hover:border-loss/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
             </div>
           `;
           feed.appendChild(card);
