@@ -50,6 +50,9 @@
       </div>
       <div class="flex items-center gap-2">
         <button onclick="toggleTheme()" class="text-xl p-2">🌙</button>
+        <button onclick="toggleNotes()" class="text-xl p-1">📝</button>
+        <button onclick="toggleSettings()" class="text-xl p-1">⚙️</button>
+
         <div class="relative">
           <button class="text-xs font-semibold bg-card border border-border px-2 py-1.5 rounded-lg hover:border-win transition-colors">CSV</button>
           <input type="file" id="csv-import" accept=".csv" class="absolute inset-0 opacity-0 cursor-pointer" onchange="importCSV(event)">
@@ -63,7 +66,7 @@
       
       <!-- Metrics & Chart -->
       <div class="bg-bg/50 backdrop-blur-sm z-10 border-b border-border">
-        <section class="grid grid-cols-5 gap-1.5 px-3 py-3">
+        <section class="grid grid-cols-3 md:grid-cols-6 gap-2 px-3 py-3">
           <div class="bg-card border border-border rounded-xl p-2 flex flex-col justify-center shadow-sm">
             <span class="text-[9px] uppercase font-bold text-muted tracking-wider mb-1">Net P&L</span>
             <span id="metric-pnl" class="text-sm md:text-xl font-bold text-text">$0.00</span>
@@ -73,8 +76,12 @@
             <span id="metric-winrate" class="text-sm md:text-xl font-bold text-text">0%</span>
           </div>
           <div class="bg-card border border-border rounded-xl p-2 flex flex-col justify-center shadow-sm">
-            <span class="text-[9px] uppercase font-bold text-muted tracking-wider mb-1">Trades</span>
-            <span id="metric-count" class="text-sm md:text-xl font-bold text-text">0</span>
+            <span class="text-[8px] uppercase font-bold text-muted tracking-wider mb-1">Balance</span>
+            <span id="metric-balance" class="text-sm md:text-lg font-bold text-text">$10k</span>
+          </div>
+          <div class="bg-card border border-border rounded-xl p-2 flex flex-col justify-center shadow-sm">
+            <span class="text-[8px] uppercase font-bold text-muted tracking-wider mb-1">Growth</span>
+            <span id="metric-growth" class="text-sm md:text-lg font-bold text-text">0%</span>
           </div>
           
           <div class="bg-card border border-border rounded-xl p-2 flex flex-col justify-center shadow-sm">
@@ -225,6 +232,9 @@
   <script>
     // --- State ---
     let trades = JSON.parse(localStorage.getItem('gongola_trades_v2')) || [];
+    let startingBalance = parseFloat(localStorage.getItem('gongola_balance')) || 10000;
+    let strategies = JSON.parse(localStorage.getItem('gongola_strategies')) || ['Breakout', 'Reversal', 'FVG', 'Trend', 'News'];
+    let dailyNotes = JSON.parse(localStorage.getItem('gongola_notes')) || {};
     let currentAction = 'BUY';
     let currentFilter = 'all';
     let currentView = 'list'; // 'list' or 'calendar'
@@ -258,6 +268,9 @@
     const metricWinrate = document.getElementById('metric-winrate');
     const metricCount = document.getElementById('metric-count');
     const metricStreak = document.getElementById('metric-streak');
+    const metricBalance = document.getElementById('metric-balance');
+    const metricGrowth = document.getElementById('metric-growth');
+    const strategySelect = document.getElementById('input-setup');
     const metricPf = document.getElementById('metric-pf');
     const goalBar = document.getElementById('goal-bar');
     let monthlyGoal = parseFloat(localStorage.getItem('gongola_goal')) || 2000;
@@ -344,6 +357,78 @@
     }
 
     // --- Data Logic ---
+    function populateStrategies() {
+      strategySelect.innerHTML = '';
+      strategies.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.innerText = s;
+        strategySelect.appendChild(opt);
+      });
+
+      const list = document.getElementById('strategy-list');
+      list.innerHTML = '';
+      strategies.forEach((s, i) => {
+        list.innerHTML += `<li class="flex justify-between items-center bg-bg border border-border px-3 py-2 rounded-lg text-sm">
+          <span>${s}</span>
+          <button onclick="deleteStrategy(${i})" class="text-loss hover:text-red-400">✕</button>
+        </li>`;
+      });
+    }
+
+    function addStrategy() {
+      const val = document.getElementById('new-strategy').value.trim();
+      if (val && !strategies.includes(val)) {
+        strategies.push(val);
+        localStorage.setItem('gongola_strategies', JSON.stringify(strategies));
+        document.getElementById('new-strategy').value = '';
+        populateStrategies();
+      }
+    }
+
+    function deleteStrategy(index) {
+      strategies.splice(index, 1);
+      localStorage.setItem('gongola_strategies', JSON.stringify(strategies));
+      populateStrategies();
+    }
+
+    function saveBalance() {
+      const val = parseFloat(document.getElementById('setting-balance').value);
+      if (!isNaN(val)) {
+        startingBalance = val;
+        localStorage.setItem('gongola_balance', startingBalance);
+        render();
+        toggleSettings();
+      }
+    }
+
+    function toggleSettings() {
+      const el = document.getElementById('settings-modal');
+      el.classList.toggle('hidden');
+      el.classList.toggle('flex');
+      if (!el.classList.contains('hidden')) {
+        document.getElementById('setting-balance').value = startingBalance;
+      }
+    }
+
+    function toggleNotes() {
+      const el = document.getElementById('notes-modal');
+      el.classList.toggle('hidden');
+      el.classList.toggle('flex');
+      if (!el.classList.contains('hidden')) {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('notes-date').innerText = today;
+        document.getElementById('daily-note-input').value = dailyNotes[today] || '';
+      }
+    }
+
+    function saveDailyNote() {
+      const today = new Date().toISOString().split('T')[0];
+      dailyNotes[today] = document.getElementById('daily-note-input').value;
+      localStorage.setItem('gongola_notes', JSON.stringify(dailyNotes));
+      toggleNotes();
+    }
+
     function saveData() {
       localStorage.setItem('gongola_trades_v2', JSON.stringify(trades));
       render();
@@ -577,7 +662,14 @@
       metricPnl.className = `text-sm md:text-xl font-bold ${totalPnl > 0 ? 'text-win' : totalPnl < 0 ? 'text-loss' : 'text-text'}`;
       metricWinrate.textContent = `${winRate}%`;
       metricWinrate.className = `text-sm md:text-xl font-bold ${winRate >= 50 ? 'text-win' : 'text-loss'}`;
-      metricCount.textContent = trades.length;
+      const currentBalance = startingBalance + totalPnl;
+      const growthPercent = ((currentBalance - startingBalance) / startingBalance) * 100;
+
+      metricBalance.textContent = '$' + currentBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      metricGrowth.textContent = (growthPercent > 0 ? '+' : '') + growthPercent.toFixed(1) + '%';
+      
+      metricBalance.className = `text-sm md:text-lg font-bold ${currentBalance >= startingBalance ? 'text-win' : 'text-loss'}`;
+      metricGrowth.className = `text-sm md:text-lg font-bold ${growthPercent >= 0 ? 'text-win' : 'text-loss'}`;
       
       metricPf.textContent = pf.toFixed(2);
       metricPf.className = `text-sm md:text-xl font-bold ${pf >= 1.5 ? 'text-win' : pf >= 1 ? 'text-yellow-400' : 'text-loss'}`;
@@ -649,7 +741,49 @@
       renderChart();
     }
 
+    populateStrategies();
     render();
   </script>
+
+  <!-- Daily Notes Modal -->
+  <div id="notes-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+    <div class="bg-card border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+      <button onclick="toggleNotes()" class="absolute top-4 right-4 text-muted hover:text-text">✕</button>
+      <h2 class="text-xl font-bold mb-4">Daily Journal</h2>
+      <p class="text-xs text-muted mb-4">End-of-day review for <span id="notes-date" class="font-bold text-text"></span></p>
+      <textarea id="daily-note-input" rows="6" class="w-full bg-bg border border-border rounded-xl p-3 text-sm focus:outline-none focus:border-win mb-4" placeholder="Morning bias, market conditions, or psychological state..."></textarea>
+      <button onclick="saveDailyNote()" class="w-full bg-win text-bg font-bold py-3 rounded-xl">Save Daily Note</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+    <div class="bg-card border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="toggleSettings()" class="absolute top-4 right-4 text-muted hover:text-text">✕</button>
+      <h2 class="text-xl font-bold mb-6">Settings</h2>
+      
+      <!-- Starting Balance -->
+      <div class="mb-6 border-b border-border pb-6">
+        <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Starting Account Balance ($)</label>
+        <div class="flex gap-2">
+          <input type="number" id="setting-balance" class="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-win">
+          <button onclick="saveBalance()" class="bg-win text-bg font-bold px-4 rounded-lg text-sm">Save</button>
+        </div>
+      </div>
+
+      <!-- Playbook Strategies -->
+      <div>
+        <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Custom Playbook Setups</label>
+        <div class="flex gap-2 mb-3">
+          <input type="text" id="new-strategy" placeholder="e.g., London Sweep" class="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-win">
+          <button onclick="addStrategy()" class="bg-card border border-border hover:border-win text-text font-bold px-4 rounded-lg text-sm transition-colors">+</button>
+        </div>
+        <ul id="strategy-list" class="space-y-2">
+          <!-- Strategies populated here -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
