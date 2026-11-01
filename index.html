@@ -123,6 +123,66 @@ textarea{min-height:80px;resize:vertical}
 .d-trade:last-child { border-bottom:none; }
 .d-notes { background:var(--surface2); padding:12px; border-radius:8px; margin-top:12px; font-size:14px; line-height:1.5; color:var(--muted); font-style:italic; }
 
+
+/* LAYOUT FIXES */
+body {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+}
+header .wrap {
+  height: 56px !important;
+}
+main {
+  margin-top: 12px !important;
+  gap: 12px !important;
+}
+.card {
+  padding: 14px !important;
+}
+.hero .net {
+  font-size: 32px !important;
+  margin: 2px 0 10px !important;
+}
+.label {
+  font-size: 9px !important;
+}
+
+/* Responsive Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+@media(min-width: 400px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Calendar Cells */
+.cal .day {
+  min-height: 38px !important;
+  aspect-ratio: auto !important;
+}
+
+/* Bottom Nav Fix */
+nav.bottom {
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom)) !important;
+}
+nav.bottom .add {
+  min-height: 46px !important;
+}
+
+/* Dialog Fixes */
+dialog {
+  max-height: 90dvh !important;
+}
+.sheet {
+  padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+}
+
+/* Journal Page */
+#journal-page {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+}
+
 </style>
 
   <meta property="og:type" content="website">
@@ -167,7 +227,7 @@ textarea{min-height:80px;resize:vertical}
     </div>
   </section>
 
-  <section class="grid3">
+  <section class="stats-grid">
     <div class="card tile"><div><div class="label">Win rate</div><b id="wr" style="font-size:18px">0%</b></div><div class="ring" id="ring" style="--p:0"><span id="wl">0W 0L</span></div></div>
     <div class="card"><div class="label">Profit Factor</div><b id="pf" style="font-size:18px">0.0</b></div>
     <div class="card"><div class="label">Streak</div><b id="streak" style="font-size:18px">–</b></div>
