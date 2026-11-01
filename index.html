@@ -476,7 +476,8 @@ $('#navSettings').onclick=openSettings;
 $('#prev').onclick=()=>{cal.setMonth(cal.getMonth()-1);renderCal()};
 $('#next').onclick=()=>{cal.setMonth(cal.getMonth()+1);renderCal()};
 $('#cal').onclick=e=>{const b=e.target.closest('[data-d]');if(b)openJournal(b.dataset.d)};
-$('#dateFilter').onchange=e=>{dateFilter=e.target.value;renderList()};\n$('#filters').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;filter=b.dataset.f;$$('#filters .chip').forEach(c=>c.classList.toggle('on',c===b));renderList()};
+$('#dateFilter').onchange=e=>{dateFilter=e.target.value;renderList()}; 
+$('#filters').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;filter=b.dataset.f;$$('#filters .chip').forEach(c=>c.classList.toggle('on',c===b));renderList()};
 $('#list').onclick=e=>{
   const t=e.target.closest('.trade');if(t)return openTrade(+t.dataset.id);
   const a=e.target.closest('[data-act]');if(!a)return;e.preventDefault();
@@ -512,24 +513,23 @@ authForm.addEventListener('submit', async (e) => {
   btn.textContent = 'Verifying...';
   btn.disabled = true;
 
+  // Save email locally FIRST, so they are never locked out
+  localStorage.setItem('gtl_user_email', email);
+  
   try {
     // Send email using FormData (most reliable for Apps Script)
     const formData = new FormData();
     formData.append('email', email);
 
-    await fetch(AUTH_URL, {
+    fetch(AUTH_URL, {
       method: 'POST',
       mode: 'no-cors', 
       body: formData
     });
-    
-    // Save locally so they don't have to log in again
-    localStorage.setItem('gtl_user_email', email);
-    authScreen.classList.add('hide');
   } catch (err) {
-    console.error(err);
-    // Even if the network fails, let them in (offline mode)
-    localStorage.setItem('gtl_user_email', email);
+    console.log('Network error, but letting user in offline:', err);
+  } finally {
+    // Always hide the screen and let them in
     authScreen.classList.add('hide');
   }
 });
