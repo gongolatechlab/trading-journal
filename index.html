@@ -545,5 +545,30 @@ checkAuth();
 
 applyTheme();updateCurrencyLabels();render();
 </script>
+
+<script>
+  // EMERGENCY LOGIN FIX
+  document.addEventListener('DOMContentLoaded', () => {
+    const authScreen = document.getElementById('auth-screen');
+    
+    // Auto-login if already saved
+    if (localStorage.getItem('gtl_user_email')) {
+      if (authScreen) authScreen.classList.add('hide');
+    }
+    
+    const form = document.getElementById('auth-form');
+    if (form) {
+      form.onsubmit = function(e) {
+        e.preventDefault();
+        const email = document.getElementById('auth-email').value.trim();
+        if (email) {
+          localStorage.setItem('gtl_user_email', email);
+          if (authScreen) authScreen.classList.add('hide');
+        }
+      };
+    }
+  });
+</script>
 </body>
+
 </html>
