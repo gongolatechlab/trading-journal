@@ -5,38 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Trading Journal | Gongola Tech Lab</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
   tailwind.config = {
     theme: {
       extend: {
         colors: {
-          bg: '#0B111E',
-          card: '#121B2E',
-          border: '#1E293B',
-          win: '#10B981',
-          loss: '#F43F5E',
-          text: '#F8FAFC',
-          muted: '#94A3B8'
+          bg: '#0B111E', card: '#121B2E', border: '#1E293B',
+          win: '#10B981', loss: '#F43F5E', text: '#F8FAFC', muted: '#94A3B8'
         },
-        fontFamily: {
-          sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-        }
+        fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] }
       }
     }
   }
 </script>
 <style>
-  /* Hide scrollbar for native app feel */
   ::-webkit-scrollbar { display: none; }
   body { -ms-overflow-style: none; scrollbar-width: none; -webkit-tap-highlight-color: transparent; }
-  /* Pulse Animation */
   @keyframes pulse-dot {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: .5; transform: scale(0.8); }
   }
   .animate-dot { animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-  /* Smooth slide up for drawer */
   .drawer-closed { transform: translateY(100%); }
   .drawer-open { transform: translateY(0); }
   .drawer-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -44,7 +35,6 @@
 </head>
 <body class="bg-bg text-text font-sans h-screen overflow-hidden flex justify-center">
 
-  <!-- App Container -->
   <div class="w-full max-w-md h-full flex flex-col relative md:grid md:grid-cols-3 md:max-w-6xl md:gap-6 md:p-6 md:h-screen">
 
     <!-- Header -->
@@ -53,42 +43,49 @@
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-win to-teal-700 flex items-center justify-center font-bold text-white shadow-lg">G</div>
         <h1 class="text-lg font-bold tracking-tight">Trading Journal</h1>
       </div>
-      <div class="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-border shadow-sm">
-        <div class="w-2 h-2 rounded-full bg-win animate-dot shadow-[0_0_8px_#10B981]"></div>
-        <span class="text-xs font-semibold text-muted">Live</span>
+      <div class="flex items-center gap-3">
+        <button onclick="exportCSV()" class="text-xs font-semibold bg-card border border-border px-3 py-1.5 rounded-lg hover:border-win hover:text-win transition-colors">Export CSV</button>
+        <div class="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-border shadow-sm">
+          <div class="w-2 h-2 rounded-full bg-win animate-dot shadow-[0_0_8px_#10B981]"></div>
+          <span class="text-xs font-semibold text-muted">Live</span>
+        </div>
       </div>
     </header>
 
-    <!-- Main Content (Metrics + Feed) -->
+    <!-- Main Content -->
     <main class="flex-1 flex flex-col overflow-hidden md:col-span-2 md:bg-card md:border md:border-border md:rounded-2xl md:shadow-xl">
       
-      <!-- Metrics -->
-      <section class="grid grid-cols-3 gap-3 px-5 py-4 md:p-6 border-b border-border bg-bg/50 backdrop-blur-sm z-10">
-        <!-- Net P&L -->
-        <div class="bg-card border border-border rounded-xl p-3 flex flex-col justify-center md:p-4 shadow-sm">
-          <span class="text-[10px] uppercase font-bold text-muted tracking-wider mb-1">Net Returns</span>
-          <span id="metric-pnl" class="text-lg md:text-2xl font-bold text-text">$0.00</span>
+      <!-- Metrics & Chart -->
+      <div class="bg-bg/50 backdrop-blur-sm z-10 border-b border-border">
+        <section class="grid grid-cols-3 gap-3 px-5 py-4 md:p-6">
+          <div class="bg-card border border-border rounded-xl p-3 flex flex-col justify-center md:p-4 shadow-sm">
+            <span class="text-[10px] uppercase font-bold text-muted tracking-wider mb-1">Net Returns</span>
+            <span id="metric-pnl" class="text-lg md:text-2xl font-bold text-text">$0.00</span>
+          </div>
+          <div class="bg-card border border-border rounded-xl p-3 flex flex-col justify-center md:p-4 shadow-sm">
+            <span class="text-[10px] uppercase font-bold text-muted tracking-wider mb-1">Win Rate</span>
+            <span id="metric-winrate" class="text-lg md:text-2xl font-bold text-text">0%</span>
+          </div>
+          <div class="bg-card border border-border rounded-xl p-3 flex flex-col justify-center md:p-4 shadow-sm">
+            <span class="text-[10px] uppercase font-bold text-muted tracking-wider mb-1">Total Trades</span>
+            <span id="metric-count" class="text-lg md:text-2xl font-bold text-text">0</span>
+          </div>
+        </section>
+
+        <!-- Chart Container -->
+        <div class="px-5 pb-5 md:px-6 md:pb-6">
+          <div class="bg-card border border-border rounded-xl p-4 shadow-sm h-32 md:h-48 relative">
+            <canvas id="equityChart"></canvas>
+          </div>
         </div>
-        <!-- Win Rate -->
-        <div class="bg-card border border-border rounded-xl p-3 flex flex-col justify-center md:p-4 shadow-sm">
-          <span class="text-[10px] uppercase font-bold text-muted tracking-wider mb-1">Win Rate</span>
-          <span id="metric-winrate" class="text-lg md:text-2xl font-bold text-text">0%</span>
-        </div>
-        <!-- Total Trades -->
-        <div class="bg-card border border-border rounded-xl p-3 flex flex-col justify-center md:p-4 shadow-sm">
-          <span class="text-[10px] uppercase font-bold text-muted tracking-wider mb-1">Total Trades</span>
-          <span id="metric-count" class="text-lg md:text-2xl font-bold text-text">0</span>
-        </div>
-      </section>
+      </div>
 
       <!-- Trade Feed -->
       <section id="trade-feed" class="flex-1 overflow-y-auto p-5 space-y-3 pb-24 md:pb-6">
-        <!-- Empty state -->
-        <div id="empty-state" class="flex flex-col items-center justify-center h-full text-center opacity-50 mt-10">
-          <svg class="w-16 h-16 mb-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <div id="empty-state" class="flex flex-col items-center justify-center h-full text-center opacity-50 mt-4">
+          <svg class="w-12 h-12 mb-3 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
           <p class="text-sm font-medium">No trades logged yet.<br>Tap + to record your first trade.</p>
         </div>
-        <!-- Dynamic Trade Cards go here -->
       </section>
 
     </main>
@@ -96,10 +93,8 @@
     <!-- Overlay Backdrop -->
     <div id="backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden opacity-0 transition-opacity duration-300" onclick="toggleDrawer()"></div>
 
-    <!-- Bottom Drawer Form (Mobile) / Side Panel (Desktop) -->
+    <!-- Bottom Drawer Form -->
     <aside id="drawer" class="fixed bottom-0 left-0 w-full bg-card border-t border-border rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-50 transform drawer-closed drawer-transition flex flex-col md:static md:translate-y-0 md:col-span-1 md:rounded-2xl md:border md:shadow-xl md:h-full">
-      
-      <!-- Drawer Handle (Mobile) -->
       <div class="w-full flex justify-center pt-3 pb-2 md:hidden" onclick="toggleDrawer()">
         <div class="w-12 h-1.5 bg-border rounded-full"></div>
       </div>
@@ -108,27 +103,20 @@
         <h2 class="text-xl font-bold mb-6">Log a New Trade</h2>
         
         <form id="trade-form" class="flex flex-col gap-4 flex-1">
-          <!-- Asset -->
           <div>
             <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Asset Name</label>
             <input type="text" id="input-asset" required placeholder="e.g. BTCUSD, XAUUSD" class="w-full bg-bg border border-border rounded-xl px-4 py-3.5 text-text placeholder-muted focus:outline-none focus:border-win focus:ring-1 focus:ring-win transition-all text-base">
           </div>
 
-          <!-- Action Toggle -->
           <div>
             <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Action</label>
             <div class="grid grid-cols-2 gap-3">
-              <button type="button" id="btn-buy" onclick="setAction('BUY')" class="bg-bg border border-border rounded-xl py-3.5 font-bold text-muted transition-all hover:border-win hover:text-win">
-                🟢 BUY (Long)
-              </button>
-              <button type="button" id="btn-sell" onclick="setAction('SELL')" class="bg-bg border border-border rounded-xl py-3.5 font-bold text-muted transition-all hover:border-loss hover:text-loss">
-                🔴 SELL (Short)
-              </button>
+              <button type="button" id="btn-buy" onclick="setAction('BUY')" class="bg-bg border border-border rounded-xl py-3.5 font-bold text-muted transition-all hover:border-win hover:text-win">🟢 BUY (Long)</button>
+              <button type="button" id="btn-sell" onclick="setAction('SELL')" class="bg-bg border border-border rounded-xl py-3.5 font-bold text-muted transition-all hover:border-loss hover:text-loss">🔴 SELL (Short)</button>
             </div>
             <input type="hidden" id="input-action" value="BUY">
           </div>
 
-          <!-- Amount -->
           <div>
             <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Profit / Loss Amount ($)</label>
             <div class="relative">
@@ -139,18 +127,13 @@
           </div>
 
           <div class="mt-auto pt-4 flex flex-col gap-3">
-            <button type="submit" class="w-full bg-win text-bg font-bold text-lg rounded-xl py-4 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:scale-[0.98] transition-transform">
-              Save Trade
-            </button>
-            <button type="button" onclick="clearAllData()" class="w-full text-loss/80 hover:text-loss text-xs font-semibold py-2 transition-colors">
-              Reset All Data Ledger
-            </button>
+            <button type="submit" class="w-full bg-win text-bg font-bold text-lg rounded-xl py-4 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:scale-[0.98] transition-transform">Save Trade</button>
+            <button type="button" onclick="clearAllData()" class="w-full text-loss/80 hover:text-loss text-xs font-semibold py-2 transition-colors">Reset All Data Ledger</button>
           </div>
         </form>
       </div>
     </aside>
 
-    <!-- Floating Action Button (Mobile Only) -->
     <button id="fab" onclick="toggleDrawer()" class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-win text-bg rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(16,185,129,0.4)] z-30 transition-transform active:scale-90">
       <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
     </button>
@@ -158,34 +141,29 @@
   </div>
 
   <script>
-    // --- State Management ---
     let trades = JSON.parse(localStorage.getItem('gongola_trades')) || [];
     let currentAction = 'BUY';
+    let chartInstance = null;
 
-    // --- DOM Elements ---
     const feed = document.getElementById('trade-feed');
     const emptyState = document.getElementById('empty-state');
     const drawer = document.getElementById('drawer');
     const backdrop = document.getElementById('backdrop');
     const form = document.getElementById('trade-form');
     
-    // Metrics
     const metricPnl = document.getElementById('metric-pnl');
     const metricWinrate = document.getElementById('metric-winrate');
     const metricCount = document.getElementById('metric-count');
 
-    // Inputs
     const inputAsset = document.getElementById('input-asset');
     const inputAmount = document.getElementById('input-amount');
     const inputAction = document.getElementById('input-action');
     const btnBuy = document.getElementById('btn-buy');
     const btnSell = document.getElementById('btn-sell');
 
-    // --- UI Logic ---
     function toggleDrawer() {
       drawer.classList.toggle('drawer-closed');
       drawer.classList.toggle('drawer-open');
-      
       if (drawer.classList.contains('drawer-open')) {
         backdrop.classList.remove('hidden');
         setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
@@ -198,7 +176,6 @@
     function setAction(action) {
       currentAction = action;
       inputAction.value = action;
-      
       if (action === 'BUY') {
         btnBuy.className = "bg-win/10 border border-win rounded-xl py-3.5 font-bold text-win transition-all shadow-[0_0_15px_rgba(16,185,129,0.15)]";
         btnSell.className = "bg-bg border border-border rounded-xl py-3.5 font-bold text-muted transition-all hover:border-loss hover:text-loss";
@@ -207,11 +184,8 @@
         btnBuy.className = "bg-bg border border-border rounded-xl py-3.5 font-bold text-muted transition-all hover:border-win hover:text-win";
       }
     }
-
-    // Initialize default action
     setAction('BUY');
 
-    // --- Data Logic ---
     function saveData() {
       localStorage.setItem('gongola_trades', JSON.stringify(trades));
       render();
@@ -231,90 +205,140 @@
       }
     }
 
+    function exportCSV() {
+      if (trades.length === 0) return alert("No trades to export.");
+      let csv = "Date,Asset,Action,Amount (USD)\n";
+      trades.forEach(t => {
+        csv += `"${new Date(t.timestamp).toLocaleString()}","${t.asset}","${t.action}",${t.amount}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Gongola_Trades_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const asset = inputAsset.value.toUpperCase().trim();
       const amount = parseFloat(inputAmount.value);
-      
       if (!asset || isNaN(amount)) return;
 
-      const newTrade = {
+      trades.unshift({
         id: Date.now().toString(),
         asset: asset,
         amount: amount,
         action: currentAction,
         timestamp: new Date().toISOString()
-      };
-
-      trades.unshift(newTrade); // Add to top
+      });
       saveData();
-      
-      // Reset form
       form.reset();
       setAction('BUY');
-      toggleDrawer(); // Close drawer
+      toggleDrawer();
     });
 
-    // --- Render Logic ---
     function formatCurrency(val) {
       return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
     }
 
     function formatTime(isoString) {
-      const date = new Date(isoString);
-      return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      return new Date(isoString).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('equityChart').getContext('2d');
+      
+      // Sort trades oldest to newest for the chart
+      const chronTrades = [...trades].reverse();
+      let cumulative = 0;
+      const labels = chronTrades.map(t => formatTime(t.timestamp).split(',')[0]);
+      const dataPoints = chronTrades.map(t => {
+        cumulative += t.amount;
+        return cumulative;
+      });
+
+      // If no trades, show a flat 0 line
+      if (dataPoints.length === 0) {
+        labels.push('Start');
+        dataPoints.push(0);
+      }
+
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: dataPoints,
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+          scales: {
+            x: { display: false },
+            y: { 
+              display: false,
+              grid: { display: false }
+            }
+          },
+          interaction: { intersect: false, mode: 'index' }
+        }
+      });
     }
 
     function render() {
-      // 1. Calculate Metrics
       const totalPnl = trades.reduce((sum, t) => sum + t.amount, 0);
       const wins = trades.filter(t => t.amount > 0).length;
       const winRate = trades.length > 0 ? Math.round((wins / trades.length) * 100) : 0;
 
-      // 2. Update Metrics UI
       metricPnl.textContent = formatCurrency(totalPnl);
       metricPnl.className = `text-lg md:text-2xl font-bold ${totalPnl > 0 ? 'text-win' : totalPnl < 0 ? 'text-loss' : 'text-text'}`;
-      
       metricWinrate.textContent = `${winRate}%`;
       metricWinrate.className = `text-lg md:text-2xl font-bold ${winRate >= 50 ? 'text-win' : 'text-loss'}`;
-      
       metricCount.textContent = trades.length;
 
-      // 3. Render Feed
       feed.innerHTML = '';
-      
       if (trades.length === 0) {
         feed.appendChild(emptyState);
         emptyState.style.display = 'flex';
-        return;
+      } else {
+        emptyState.style.display = 'none';
+        trades.forEach(trade => {
+          const isWin = trade.amount > 0;
+          const sign = isWin ? '+' : '';
+          const card = document.createElement('div');
+          card.className = `bg-card border border-border rounded-xl p-4 flex justify-between items-center shadow-sm relative overflow-hidden ${isWin ? 'border-l-4 border-l-win' : 'border-l-4 border-l-loss'}`;
+          card.innerHTML = `
+            <div class="flex flex-col">
+              <span class="text-sm font-semibold text-muted mb-1">${trade.action} · ${trade.asset}</span>
+              <span class="text-xl font-bold ${isWin ? 'text-win' : 'text-loss'}">${sign}${formatCurrency(trade.amount)}</span>
+              <span class="text-[10px] text-muted mt-1 font-mono">${formatTime(trade.timestamp)}</span>
+            </div>
+            <button onclick="deleteTrade('${trade.id}')" class="p-2 text-muted hover:text-loss transition-colors rounded-lg bg-bg border border-border hover:border-loss/30">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          `;
+          feed.appendChild(card);
+        });
       }
-      
-      emptyState.style.display = 'none';
-
-      trades.forEach(trade => {
-        const isWin = trade.amount > 0;
-        const sign = isWin ? '+' : '';
-        
-        const card = document.createElement('div');
-        card.className = `bg-card border border-border rounded-xl p-4 flex justify-between items-center shadow-sm relative overflow-hidden ${isWin ? 'border-l-4 border-l-win' : 'border-l-4 border-l-loss'}`;
-        
-        card.innerHTML = `
-          <div class="flex flex-col">
-            <span class="text-sm font-semibold text-muted mb-1">${trade.action} · ${trade.asset}</span>
-            <span class="text-xl font-bold ${isWin ? 'text-win' : 'text-loss'}">${sign}${formatCurrency(trade.amount)}</span>
-            <span class="text-[10px] text-muted mt-1 font-mono">${formatTime(trade.timestamp)}</span>
-          </div>
-          <button onclick="deleteTrade('${trade.id}')" class="p-2 text-muted hover:text-loss transition-colors rounded-lg bg-bg border border-border hover:border-loss/30">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-          </button>
-        `;
-        feed.appendChild(card);
-      });
+      renderChart();
     }
 
-    // Initial Render
     render();
-
   </script>
 </body>
 </html>
