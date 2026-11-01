@@ -103,9 +103,33 @@ textarea{min-height:100px;resize:vertical}
 .theme i{display:block;height:30px;border-radius:8px;margin-bottom:6px}
 .toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:20}
 .toast.show{opacity:1;transform:translate(-50%,0)}
+
+#auth-screen{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;transition:opacity .3s;}
+#auth-screen.hide{opacity:0;pointer-events:none;}
+.auth-box{background:var(--surface);border:1px solid var(--line);padding:40px 24px;border-radius:24px;width:100%;max-width:400px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.4);}
+.auth-box .logo{width:60px;height:60px;font-size:24px;margin:0 auto 20px;border-radius:16px;background:var(--accent);color:var(--ink);display:grid;place-items:center;font-weight:800;}
+.auth-box h2{margin:0 0 10px;font-size:24px;}
+.auth-box p{color:var(--muted);margin:0 0 24px;font-size:14px;}
+.auth-box input{margin-bottom:16px;text-align:center;font-size:16px;}
+.auth-box .btn{width:100%;min-height:50px;font-size:16px;}
+
 </style>
 </head>
 <body>
+
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="logo">G</div>
+    <h2>Welcome to your Journal</h2>
+    <p>Enter your email to access your private trading dashboard.</p>
+    <form id="auth-form">
+      <input type="email" id="auth-email" placeholder="you@email.com" required autocomplete="email">
+      <button type="submit" class="btn primary" id="auth-btn">Continue to App</button>
+    </form>
+    <p style="margin-top:20px;font-size:12px;">Your data is stored privately on this device.</p>
+  </div>
+</div>
+
 
 <header><div class="wrap">
   <div class="brand"><div class="logo">G</div>Trading Journal</div>
@@ -218,6 +242,7 @@ textarea{min-height:100px;resize:vertical}
     <div style="display:flex;gap:8px"><input id="newSetup" placeholder="Add a setup name"><button type="button" class="btn primary" id="addSetup" style="flex:none">Add</button></div></div>
   <div class="actions"><button type="button" class="btn" data-close>Close</button><button class="btn primary" type="submit">Save</button></div>
   <button type="button" class="btn danger block" id="reset">Erase all trades &amp; notes</button>
+<button type="button" class="btn block" id="logout" style="margin-top:10px;background:transparent;border:1px solid var(--line)">Log out of this device</button>
 </form></dialog>
 
 <div class="toast" id="toast"></div>
@@ -300,7 +325,7 @@ function renderList(){
   if(!v.length){
     $('#list').innerHTML=trades.length
       ?'<div class="empty"><svg class="ico" style="width:48px;height:48px;margin:0 auto 12px;opacity:0.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>No trades match this filter.</p></div>'
-      :'<div class="empty"><svg class="ico" style="width:48px;height:48px;margin:0 auto 12px;opacity:0.5" viewBox="0 0 24 24"><path d="M12 20v-6M6 20V10M18 20V4"/></svg><p><b>Your journal is empty</b><br>Log your first trade to start tracking your progress.</p><button class="btn primary" data-act="add" style="display:inline-flex;align-items:center;gap:4px"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Log first trade</button><p style="margin-top:14px"><a class="link" href="#" data-act="sample">Just looking? Add example trades</a></p></div>';
+      :'<div class="empty"><svg class="ico" style="width:48px;height:48px;margin:0 auto 12px;opacity:0.5" viewBox="0 0 24 24"><path d="M12 20v-6M6 20V10M18 20V4"/></svg><p><b>Your journal is empty</b><br>Log your first trade to start tracking your progress.</p><button class="btn primary" data-act="add" style="display:inline-flex;align-items:center;gap:4px"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Log first trade</button></div>';
     return;
   }
   $('#list').innerHTML=v.map(t=>{
@@ -390,6 +415,56 @@ $('#list').onclick=e=>{
 };
 $$('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
+
+
+// --- AUTHENTICATION LOGIC ---
+const AUTH_URL = "https://script.google.com/macros/s/AKfycbwP_PLACEHOLDER_URL/exec"; // We will replace this
+const authScreen = document.getElementById('auth-screen');
+const authForm = document.getElementById('auth-form');
+
+function checkAuth() {
+  const savedEmail = localStorage.getItem('gtl_user_email');
+  if (savedEmail) {
+    authScreen.classList.add('hide');
+  }
+}
+
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('auth-email').value.trim();
+  const btn = document.getElementById('auth-btn');
+  
+  btn.textContent = 'Verifying...';
+  btn.disabled = true;
+
+  try {
+    // Send email to Google Sheets via Apps Script
+    await fetch(AUTH_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Bypasses CORS issues for simple POST
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ email: email })
+    });
+    
+    // Save locally so they don't have to log in again
+    localStorage.setItem('gtl_user_email', email);
+    authScreen.classList.add('hide');
+  } catch (err) {
+    console.error(err);
+    // Even if the network fails, let them in (offline mode)
+    localStorage.setItem('gtl_user_email', email);
+    authScreen.classList.add('hide');
+  }
+});
+
+document.getElementById('logout').onclick = () => {
+  if(confirm("Are you sure you want to log out?")) {
+    localStorage.removeItem('gtl_user_email');
+    location.reload();
+  }
+};
+
+checkAuth();
 
 applyTheme();updateCurrencyLabels();render();
 </script>
