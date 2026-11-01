@@ -13,12 +13,12 @@
 [data-theme=midnight]{--bg:#0B0C10;--surface:#1F2833;--surface2:#151E26;--text:#eef1fb;--muted:#8d97b8;--line:rgba(255,255,255,0.1);--accent:#00E5FF;--ink:#0B0C10;--win:#00FF66;--loss:#FF3B30;--winbg:rgba(0,255,102,.1);--lossbg:rgba(255,59,48,.1);--shadow:0 10px 30px rgba(0,0,0,.35)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 var(--font);padding-bottom:110px;
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 var(--font);padding-bottom:100px;
   background-image:linear-gradient(rgba(0,229,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.03) 1px,transparent 1px);background-size:40px 40px}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
 .ico{width:20px;height:20px;display:inline-block;vertical-align:middle;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px 20px}
 header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.1em}
@@ -109,6 +109,20 @@ textarea{min-height:80px;resize:vertical}
 .auth-box p{color:var(--muted);margin:0 0 20px;font-size:13px}
 .auth-box input{margin-bottom:12px;text-align:center}
 .auth-box .btn{width:100%;min-height:46px}
+
+#journal-page { display:none; flex-direction:column; position:fixed; inset:0; background:var(--bg); z-index:40; overflow-y:auto; padding-bottom:100px; }
+#journal-page.active { display:flex; }
+.j-header { display:flex; align-items:center; padding:16px; border-bottom:1px solid var(--line); background:color-mix(in srgb,var(--bg) 85%,transparent); backdrop-filter:blur(12px); position:sticky; top:0; z-index:10; }
+.j-back { background:var(--surface2); border:1px solid var(--line); width:40px; height:40px; border-radius:var(--r); display:grid; place-items:center; margin-right:12px; }
+.j-title { font-size:18px; font-weight:700; margin:0; }
+.j-content { padding:16px; max-width:800px; margin:0 auto; width:100%; }
+.day-detail { display:none; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:16px; margin-top:16px; }
+.day-detail.active { display:block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+.d-trade { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:14px; font-family:var(--mono); }
+.d-trade:last-child { border-bottom:none; }
+.d-notes { background:var(--surface2); padding:12px; border-radius:8px; margin-top:12px; font-size:14px; line-height:1.5; color:var(--muted); font-style:italic; }
+
 </style>
 </head>
 <body>
@@ -191,6 +205,37 @@ textarea{min-height:80px;resize:vertical}
  </div>
 </main></div>
 
+
+<!-- FULL JOURNAL PAGE -->
+<div id="journal-page">
+  <div class="j-header">
+    <button class="j-back" id="jBackBtn"><svg class="ico" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <h2 class="j-title">My Journal</h2>
+  </div>
+  <div class="j-content">
+    <div class="card">
+      <div class="head">
+        <h2 id="jCalTitle">Calendar</h2>
+        <div style="display:flex;gap:6px"><button class="iconbtn" id="jPrev"><svg class="ico" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><button class="iconbtn" id="jNext"><svg class="ico" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+      </div>
+      <div class="cal" id="jCal" style="gap:8px; font-size:14px;"></div>
+    </div>
+
+    <!-- Daily Detail View -->
+    <div class="day-detail" id="dayDetail">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+        <div>
+          <h3 id="ddDate" style="margin:0 0 4px; font-size:18px;">Date</h3>
+          <p class="label" id="ddPnl" style="font-size:14px; margin:0;">$0.00</p>
+        </div>
+        <button class="btn" id="ddEditBtn">Edit Note</button>
+      </div>
+      <div id="ddTrades" style="margin-bottom:12px;"></div>
+      <div class="d-notes" id="ddNotes">No notes for this day.</div>
+    </div>
+  </div>
+</div>
+
 <nav class="bottom"><div class="in">
   <button class="s" id="navJournal"><svg class="ico" style="width:22px;height:22px" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Journal</button>
   <button class="btn primary add" id="navAdd"><svg class="ico" style="width:20px;height:20px" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Log trade</button>
@@ -238,10 +283,17 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const todayStr=()=>ymd(new Date());
-const money=(n,sign)=>{const abs=Math.abs(n);const fmt=new Intl.NumberFormat(undefined,{style:'currency',currency:cfg.currency||'USD'});if(n<0)return '-'+fmt.format(abs);if(n>0&&sign)return '+'+fmt.format(abs);return fmt.format(abs)};
+const money=(n,sign)=>{
+  const rate = cfg.rates[cfg.currency] || 1;
+  const converted = Math.abs(n) * rate;
+  const fmt=new Intl.NumberFormat(undefined,{style:'currency',currency:cfg.currency||'USD'});
+  if(n<0)return '-'+fmt.format(converted);
+  if(n>0&&sign)return '+'+fmt.format(converted);
+  return fmt.format(converted);
+};
 
 let trades=store.get('tj_trades',[]), notes=store.get('tj_notes',{});
-let cfg=Object.assign({balance:10000,goal:1000,currency:'USD',setups:['Breakout','Reversal','FVG']},store.get('tj_cfg',{}));
+let cfg=Object.assign({balance:10000,goal:1000,currency:'USD',rates:{USD:1,EUR:0.92,GBP:0.79,NGN:1500,KES:130,GHS:14},setups:['Breakout','Reversal','FVG']},store.get('tj_cfg',{}));
 let filter='all', dateFilter='all', cal=new Date(); cal.setDate(1);
 const save=()=>{store.set('tj_trades',trades);store.set('tj_notes',notes);store.set('tj_cfg',cfg)};
 
@@ -364,7 +416,7 @@ $$('input[name=res]').forEach(r=>r.onchange=amtVisibility);
 
 function loadJournal(){const d=$('#jDate').value;$('#jText').value=notes[d]||''}
 function openJournal(d){$('#jDate').value=d||todayStr();loadJournal();$('#dJournal').showModal()}
-$('#fJournal').addEventListener('submit',e=>{e.preventDefault();const d=$('#jDate').value,v=$('#jText').value.trim();v?notes[d]=v:delete notes[d];save();render();$('#dJournal').close();toast('Review saved')});
+$('#fJournal').addEventListener('submit',e=>{e.preventDefault();const d=$('#jDate').value,v=$('#jText').value.trim();v?notes[d]=v:delete notes[d];save();render();$('#dJournal').close();toast('Review saved'); if(document.getElementById('journal-page').classList.contains('active')){showDayDetail(selectedDay);}});
 
 function openSettings(){$('#sBal').value=cfg.balance;$('#sGoal').value=cfg.goal;$('#sCurr').value=cfg.currency;$('#dSettings').showModal()}
 $('#fSettings').addEventListener('submit',e=>{e.preventDefault();cfg.balance=parseFloat($('#sBal').value)||0;cfg.goal=parseFloat($('#sGoal').value)||0;cfg.currency=$('#sCurr').value;save();render();$('#dSettings').close();toast('Settings saved')});
@@ -397,7 +449,72 @@ $('#csvInput').onchange=e=>{
 };
 
 $('#navAdd').onclick=()=>openTrade();
-$('#navJournal').onclick=()=>openJournal();
+
+let jCal = new Date(); jCal.setDate(1);
+let selectedDay = todayStr();
+
+function renderJournalCal() {
+  const y=jCal.getFullYear(), m=jCal.getMonth(), first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
+  document.getElementById('jCalTitle').innerText = jCal.toLocaleString(undefined,{month:'long',year:'numeric'});
+  let h=['S','M','T','W','T','F','S'].map(d=>'<div class="dow">'+d+'</div>').join('');
+  for(let i=0;i<first;i++)h+='<div class="day blank"></div>';
+  for(let d=1;d<=days;d++){
+    const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const dayTrades=trades.filter(t=>t.date===ds); const p=dayTrades.reduce((a,t)=>a+t.pnl,0);
+    const cls=['day',dayTrades.length&&p>0?'win':'',dayTrades.length&&p<0?'loss':'',ds===todayStr()?'today':''].join(' ');
+    h+='<button class="'+cls+'" data-d="'+ds+'" style="min-height:44px; border-radius:8px;">'+d+'</button>';
+  }
+  document.getElementById('jCal').innerHTML=h;
+}
+
+function showDayDetail(ds) {
+  selectedDay = ds;
+  const dayTrades = trades.filter(t=>t.date===ds);
+  const pnl = dayTrades.reduce((a,t)=>a+t.pnl,0);
+  
+  document.getElementById('ddDate').innerText = new Date(ds+'T00:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  
+  const pnlEl = document.getElementById('ddPnl');
+  pnlEl.innerText = money(pnl, true);
+  pnlEl.className = 'label ' + (pnl>0?'pos':pnl<0?'neg':'');
+  
+  const tList = document.getElementById('ddTrades');
+  if(dayTrades.length === 0) {
+    tList.innerHTML = '<p class="hint">No trades on this day.</p>';
+  } else {
+    tList.innerHTML = dayTrades.map(t=>`
+      <div class="d-trade">
+        <span><b>${t.asset}</b> <span style="color:var(--muted);font-size:12px">${t.action} · ${t.setup}</span></span>
+        <span class="${t.pnl>0?'pos':t.pnl<0?'neg':''}">${money(t.pnl, true)}</span>
+      </div>
+    `).join('');
+  }
+  
+  const notesEl = document.getElementById('ddNotes');
+  notesEl.innerText = notes[ds] || 'No notes for this day.';
+  notesEl.style.fontStyle = notes[ds] ? 'italic' : 'normal';
+  
+  document.getElementById('dayDetail').classList.add('active');
+}
+
+document.getElementById('navJournal').onclick = () => {
+  document.getElementById('journal-page').classList.add('active');
+  renderJournalCal();
+  showDayDetail(selectedDay);
+};
+document.getElementById('jBackBtn').onclick = () => {
+  document.getElementById('journal-page').classList.remove('active');
+};
+document.getElementById('jPrev').onclick = () => { jCal.setMonth(jCal.getMonth()-1); renderJournalCal(); };
+document.getElementById('jNext').onclick = () => { jCal.setMonth(jCal.getMonth()+1); renderJournalCal(); };
+document.getElementById('jCal').onclick = (e) => {
+  const b = e.target.closest('[data-d]');
+  if(b) showDayDetail(b.dataset.d);
+};
+document.getElementById('ddEditBtn').onclick = () => {
+  openJournal(selectedDay);
+};
+
 $('#navSettings').onclick=openSettings;
 $('#prev').onclick=()=>{cal.setMonth(cal.getMonth()-1);renderCal()};
 $('#next').onclick=()=>{cal.setMonth(cal.getMonth()+1);renderCal()};
@@ -420,6 +537,19 @@ $('#auth-form').addEventListener('submit',e=>{
   authScreen.classList.add('hide');
 });
 $('#logout').onclick=()=>{if(confirm("Log out?")){localStorage.removeItem('gtl_user_email');location.reload()}};
+
+
+async function fetchRates() {
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await res.json();
+    if(data.rates) {
+      cfg.rates = { USD: 1, EUR: data.rates.EUR, GBP: data.rates.GBP, NGN: data.rates.NGN, KES: data.rates.KES, GHS: data.rates.GHS };
+      save(); render();
+    }
+  } catch(e) { console.log('Offline, using cached rates'); }
+}
+fetchRates();
 
 render();
 </script>
