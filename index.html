@@ -174,7 +174,7 @@ textarea{min-height:100px;resize:vertical}
     <div class="seg"><label class="b"><input type="radio" name="act" value="BUY" checked><span style="display:flex;align-items:center;gap:4px"><svg class="ico" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg> Buy</span></label><label class="s"><input type="radio" name="act" value="SELL"><span style="display:flex;align-items:center;gap:4px"><svg class="ico" viewBox="0 0 24 24"><line x1="7" y1="7" x2="17" y2="17"/><polyline points="17 7 17 17 7 17"/></svg> Sell</span></label></div></div>
   <div class="field"><span>Result</span>
     <div class="seg"><label class="b"><input type="radio" name="res" value="win" checked><span>Win</span></label><label class="s"><input type="radio" name="res" value="loss"><span>Loss</span></label><label><input type="radio" name="res" value="be"><span>Even</span></label></div></div>
-  <div class="field" id="amtBox"><span>How much? ($)</span><input type="number" id="tAmt" inputmode="decimal" step="any" min="0" placeholder="0.00"></div>
+  <div class="field" id="amtBox"><span>How much? (<span class="curr-label">$</span>)</span><input type="number" id="tAmt" inputmode="decimal" step="any" min="0" placeholder="0.00"></div>
   <div class="field"><span>Setup used</span><select id="tSetup"></select></div>
   <div class="field"><span>Reward for every 1 risked (optional)</span><input type="number" id="tRR" inputmode="decimal" step="any" min="0" placeholder="e.g. 2"><div class="hint" id="rrHint">Ratio: --</div></div>
   <div class="field"><span>Did you make a mistake?</span><select id="tMistake">
@@ -196,8 +196,18 @@ textarea{min-height:100px;resize:vertical}
 <!-- Settings -->
 <dialog id="dSettings"><form class="sheet" id="fSettings">
   <h3>Settings</h3>
-  <div class="field"><span>Starting balance ($)</span><input type="number" id="sBal" inputmode="decimal" min="0" step="any"></div>
-  <div class="field"><span>Monthly profit goal ($)</span><input type="number" id="sGoal" inputmode="decimal" min="0" step="any"></div>
+  <div class="field"><span>Currency</span>
+    <select id="sCurr">
+      <option value="USD">USD ($)</option>
+      <option value="EUR">EUR (€)</option>
+      <option value="GBP">GBP (£)</option>
+      <option value="NGN">NGN (₦)</option>
+      <option value="KES">KES (KSh)</option>
+      <option value="GHS">GHS (₵)</option>
+    </select>
+  </div>
+  <div class="field"><span>Starting balance (<span class="curr-label">$</span>)</span><input type="number" id="sBal" inputmode="decimal" min="0" step="any"></div>
+  <div class="field"><span>Monthly profit goal (<span class="curr-label">$</span>)</span><input type="number" id="sGoal" inputmode="decimal" min="0" step="any"></div>
   <div class="field"><span>Look &amp; feel</span>
     <div class="themes" id="themes">
       <button type="button" class="theme" data-t="midnight"><i style="background:linear-gradient(135deg,#0b1020,#6c8cff)"></i>Midnight</button>
@@ -218,11 +228,23 @@ const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const todayStr=()=>ymd(new Date());
-const money=(n,sign)=>(n<0?'-':(sign&&n>0?'+':''))+'$'+Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-const short=n=>'$'+Math.round(n).toLocaleString();
+const money=(n,sign)=>{
+  const abs=Math.abs(n);
+  const fmt=new Intl.NumberFormat(undefined,{style:'currency',currency:cfg.currency||'USD'});
+  if(n<0)return '-'+fmt.format(abs);
+  if(n>0&&sign)return '+'+fmt.format(abs);
+  return fmt.format(abs);
+};
+const short=n=>{
+  return new Intl.NumberFormat(undefined,{style:'currency',currency:cfg.currency||'USD',maximumFractionDigits:0}).format(n);
+};
+const updateCurrencyLabels=()=>{
+  const symbols={USD:'$',EUR:'€',GBP:'£',NGN:'₦',KES:'KSh',GHS:'₵'};
+  document.querySelectorAll('.curr-label').forEach(el=>el.textContent=symbols[cfg.currency]||'$');
+};
 
 let trades=store.get('tj_trades',[]), notes=store.get('tj_notes',{});
-let cfg=Object.assign({balance:10000,goal:1000,theme:'midnight',setups:['Breakout','Reversal','FVG','Trend','News']},store.get('tj_cfg',{}));
+let cfg=Object.assign({balance:10000,goal:1000,theme:'midnight',currency:'USD',setups:['Breakout','Reversal','FVG','Trend','News']},store.get('tj_cfg',{}));
 let filter='all', cal=new Date(); cal.setDate(1);
 const save=()=>{store.set('tj_trades',trades);store.set('tj_notes',notes);store.set('tj_cfg',cfg)};
 
@@ -332,11 +354,11 @@ $('#fJournal').addEventListener('submit',e=>{e.preventDefault();const d=$('#jDat
 
 /* ---------- settings ---------- */
 function renderSetups(){$('#setups').innerHTML=cfg.setups.map((s,i)=>'<span class="chip">'+esc(s)+' <b data-rm="'+i+'" style="cursor:pointer;color:var(--loss)">✕</b></span>').join('')}
-function openSettings(){$('#sBal').value=cfg.balance;$('#sGoal').value=cfg.goal;renderSetups();applyTheme();$('#dSettings').showModal()}
+function openSettings(){$('#sBal').value=cfg.balance;$('#sGoal').value=cfg.goal;$('#sCurr').value=cfg.currency;renderSetups();applyTheme();$('#dSettings').showModal()}
 $('#addSetup').onclick=()=>{const v=$('#newSetup').value.trim();if(v&&!cfg.setups.includes(v)){cfg.setups.push(v);$('#newSetup').value='';save();renderSetups()}};
 $('#setups').onclick=e=>{const i=e.target.dataset.rm;if(i!==undefined){cfg.setups.splice(+i,1);save();renderSetups()}};
 $('#themes').onclick=e=>{const b=e.target.closest('.theme');if(b){cfg.theme=b.dataset.t;applyTheme();save()}};
-$('#fSettings').addEventListener('submit',e=>{e.preventDefault();cfg.balance=parseFloat($('#sBal').value)||0;cfg.goal=parseFloat($('#sGoal').value)||0;save();render();$('#dSettings').close();toast('Settings saved')});
+$('#fSettings').addEventListener('submit',e=>{e.preventDefault();cfg.balance=parseFloat($('#sBal').value)||0;cfg.goal=parseFloat($('#sGoal').value)||0;cfg.currency=$('#sCurr').value;save();updateCurrencyLabels();render();$('#dSettings').close();toast('Settings saved')});
 $('#reset').onclick=()=>{if(confirm('This permanently erases ALL trades and notes. Continue?')){trades=[];notes={};save();render();$('#dSettings').close();toast('Journal cleared')}};
 
 /* ---------- export ---------- */
@@ -369,7 +391,7 @@ $('#list').onclick=e=>{
 $$('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
 
-applyTheme();render();
+applyTheme();updateCurrencyLabels();render();
 </script>
 </body>
 </html>
