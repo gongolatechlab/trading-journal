@@ -438,12 +438,14 @@ authForm.addEventListener('submit', async (e) => {
   btn.disabled = true;
 
   try {
-    // Send email to Google Sheets via Apps Script
+    // Send email using FormData (most reliable for Apps Script)
+    const formData = new FormData();
+    formData.append('email', email);
+
     await fetch(AUTH_URL, {
       method: 'POST',
-      mode: 'no-cors', // Bypasses CORS issues for simple POST
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ email: email })
+      mode: 'no-cors', 
+      body: formData
     });
     
     // Save locally so they don't have to log in again
