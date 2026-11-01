@@ -7,14 +7,15 @@
 <title>Trading Journal | Gongola Tech Lab</title>
 <style>
 .ico{width:20px;height:20px;display:inline-block;vertical-align:middle;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-:root{--r:18px;--font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-[data-theme=midnight]{--bg:#0b1020;--surface:#141a2e;--surface2:#1b2340;--text:#eef1fb;--muted:#8d97b8;--line:#252e4d;--accent:#6c8cff;--ink:#fff;--win:#2ed39a;--loss:#ff5d73;--winbg:rgba(46,211,154,.14);--lossbg:rgba(255,93,115,.14);--shadow:0 10px 30px rgba(0,0,0,.35)}
+:root{--r:8px;--font:'Space Grotesk',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:'JetBrains Mono',monospace}
+[data-theme=midnight]{--bg:#0B0C10;--surface:#1F2833;--surface2:#151E26;--text:#eef1fb;--muted:#8d97b8;--line:rgba(255,255,255,0.1);--accent:#00E5FF;--ink:#0B0C10;--win:#00FF66;--loss:#FF3B30;--winbg:rgba(0,255,102,.1);--lossbg:rgba(255,59,48,.1);--shadow:0 10px 30px rgba(0,0,0,.35)}
 [data-theme=daylight]{--bg:#f3f5fb;--surface:#fff;--surface2:#eef1f9;--text:#141a2e;--muted:#6b7596;--line:#e3e7f2;--accent:#3d5afe;--ink:#fff;--win:#10a874;--loss:#e5384f;--winbg:rgba(16,168,116,.12);--lossbg:rgba(229,56,79,.1);--shadow:0 10px 30px rgba(30,40,90,.10)}
 [data-theme=emerald]{--bg:#07130f;--surface:#0f211a;--surface2:#163026;--text:#e9f7f0;--muted:#86a99a;--line:#1d382d;--accent:#f5c451;--ink:#241a00;--win:#37e0a0;--loss:#ff6b6b;--winbg:rgba(55,224,160,.14);--lossbg:rgba(255,107,107,.14);--shadow:0 10px 30px rgba(0,0,0,.4)}
 [data-theme=emerald]{--surface2:#163026}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 var(--font);padding-bottom:110px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 var(--font);padding-bottom:110px;
+    background-image:linear-gradient(rgba(0,229,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.03) 1px,transparent 1px);background-size:40px 40px}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
 .wrap{max-width:1000px;margin:0 auto;padding:0 16px}
@@ -22,7 +23,7 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88
 header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
 .logo{width:34px;height:34px;border-radius:11px;background:var(--accent);color:var(--ink);display:grid;place-items:center;font-weight:800}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:14px;background:var(--surface2);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:6px;background:var(--surface2);font-weight:600}
 .btn.primary{background:var(--accent);color:var(--ink)}
 .btn.danger{background:var(--lossbg);color:var(--loss)}
 .btn.block{width:100%}
@@ -30,13 +31,13 @@ main{display:grid;gap:16px;margin-top:16px}
 @media(min-width:900px){main{grid-template-columns:1fr 1fr;align-items:start}.col{display:grid;gap:16px}}
 .col{display:grid;gap:16px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
-.label{font-size:13px;color:var(--muted);font-weight:600}
-.hero .net{font-size:40px;font-weight:800;letter-spacing:-1px;margin:4px 0 14px}
+.label{font-size:11px;color:var(--muted);font-weight:500;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.05em}
+.hero .net{font-family:var(--mono);font-size:40px;font-weight:800;letter-spacing:-1px;margin:4px 0 14px}
 .pos{color:var(--win)}.neg{color:var(--loss)}
 .row{display:flex;gap:12px}
 .row>*{flex:1}
-.mini{background:var(--surface2);border-radius:14px;padding:12px}
-.mini b{display:block;font-size:19px;margin-top:2px}
+.mini{background:var(--surface2);border-radius:6px;padding:12px}
+.mini b{font-family:var(--mono);display:block;font-size:19px;margin-top:2px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .ring{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--win) calc(var(--p)*1%),var(--surface) 0)}
 .ring span{width:42px;height:42px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:12px;font-weight:700}
@@ -58,8 +59,8 @@ main{display:grid;gap:16px;margin-top:16px}
 .chip{flex:none;min-height:38px;padding:0 16px;border-radius:99px;background:var(--surface2);font-weight:600;font-size:14px;color:var(--muted)}
 .chip.on{background:var(--accent);color:var(--ink)}
 .list{display:grid;gap:10px;margin-top:12px}
-.trade{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface2);border-radius:16px;padding:12px}
-.side{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:12px;flex:none}
+.trade{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface2);border-radius:8px;padding:12px}
+.side{width:44px;height:44px;border-radius:6px;display:grid;place-items:center;font-weight:800;font-size:12px;flex:none}
 .side.BUY{background:var(--winbg);color:var(--win)}
 .side.SELL{background:var(--lossbg);color:var(--loss)}
 .trade .mid{flex:1;min-width:0}
@@ -83,13 +84,13 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .sheet h3{margin:0;font-size:20px}
 .field{display:grid;gap:6px}
 .field>span{font-size:13px;font-weight:600;color:var(--muted)}
-input,select,textarea{width:100%;min-height:48px;padding:10px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface2);outline:none}
+input,select,textarea{width:100%;min-height:48px;padding:10px 14px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface2);outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 textarea{min-height:100px;resize:vertical}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
 .seg label{position:relative}
 .seg input{position:absolute;opacity:0;inset:0;min-height:0;cursor:pointer}
-.seg span{display:grid;place-items:center;min-height:48px;border-radius:14px;background:var(--surface2);font-weight:700;border:1.5px solid transparent;color:var(--muted)}
+.seg span{display:grid;place-items:center;min-height:48px;border-radius:6px;background:var(--surface2);font-weight:700;border:1.5px solid transparent;color:var(--muted)}
 .seg input:checked+span{border-color:var(--accent);color:var(--text);background:color-mix(in srgb,var(--accent) 18%,var(--surface2))}
 .seg .b input:checked+span{border-color:var(--win);color:var(--win);background:var(--winbg)}
 .seg .s input:checked+span{border-color:var(--loss);color:var(--loss);background:var(--lossbg)}
@@ -98,22 +99,26 @@ textarea{min-height:100px;resize:vertical}
 .setups{display:flex;flex-wrap:wrap;gap:8px}
 .setups .chip{display:inline-flex;align-items:center;gap:6px}
 .themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.theme{border-radius:14px;padding:10px;border:2px solid var(--line);text-align:center;font-size:13px;font-weight:700}
+.theme{border-radius:6px;padding:10px;border:2px solid var(--line);text-align:center;font-size:13px;font-weight:700}
 .theme.on{border-color:var(--accent)}
 .theme i{display:block;height:30px;border-radius:8px;margin-bottom:6px}
-.toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:20}
+.toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:6px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:20}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 #auth-screen{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;transition:opacity .3s;}
 #auth-screen.hide{opacity:0;pointer-events:none;}
 .auth-box{background:var(--surface);border:1px solid var(--line);padding:40px 24px;border-radius:24px;width:100%;max-width:400px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.4);}
-.auth-box .logo{width:60px;height:60px;font-size:24px;margin:0 auto 20px;border-radius:16px;background:var(--accent);color:var(--ink);display:grid;place-items:center;font-weight:800;}
+.auth-box .logo{width:60px;height:60px;font-size:24px;margin:0 auto 20px;border-radius:8px;background:var(--accent);color:var(--ink);display:grid;place-items:center;font-weight:800;}
 .auth-box h2{margin:0 0 10px;font-size:24px;}
 .auth-box p{color:var(--muted);margin:0 0 24px;font-size:14px;}
 .auth-box input{margin-bottom:16px;text-align:center;font-size:16px;}
 .auth-box .btn{width:100%;min-height:50px;font-size:16px;}
 
 </style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -132,7 +137,7 @@ textarea{min-height:100px;resize:vertical}
 
 
 <header><div class="wrap">
-  <div class="brand"><div class="logo">G</div>Trading Journal</div>
+  <div class="brand"><div class="logo" style="border-radius:4px">G</div><span style="letter-spacing:0.1em;text-transform:uppercase;font-size:15px">Gongola<span style="color:var(--win)"> Journal</span></span></div>
   <button class="btn" id="exportBtn" aria-label="Download CSV"><svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
 </div></header>
 
