@@ -710,6 +710,16 @@
             <div><div class="text-[9px] font-mono text-muted uppercase">SL</div><div class="text-xs font-mono font-bold text-loss">${s.sl}</div></div>
             <div><div class="text-[9px] font-mono text-muted uppercase">TP</div><div class="text-xs font-mono font-bold text-win">${s.tp}</div></div>
           </div>
+          <div class="text-center mt-1">
+            <span class="text-[10px] font-mono font-bold text-cyan">
+              ${(() => {
+                const risk = Math.abs(s.entry - s.sl);
+                const reward = Math.abs(s.tp - s.entry);
+                if (risk > 0) return 'R:R 1:' + (reward / risk).toFixed(1);
+                return 'R:R 1:--';
+              })()}
+            </span>
+          </div>
           
           ${s.analysis ? `
             <button onclick="toggleGlobalSignalNotes('${s.id}')" class="mt-3 text-[10px] font-bold text-accent flex items-center gap-1 w-max">
