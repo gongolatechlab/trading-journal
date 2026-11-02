@@ -348,6 +348,19 @@
       </div>
     </div>
 
+
+    <div>
+      <label class="block text-[10px] font-mono text-muted uppercase mb-1">Chart Image (AI Analyze)</label>
+      <input type="file" id="sig-image-input" accept="image/*" class="w-full bg-bg border border-line rounded-lg px-3 py-2 text-sm text-muted file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-surface2 file:text-white hover:file:bg-surface transition-all">
+      <div id="sig-image-preview-container" class="hidden mt-2 relative rounded-lg overflow-hidden border border-line">
+        <img id="sig-image-preview" class="w-full h-32 object-cover">
+        <div id="sig-image-loading" class="absolute inset-0 bg-black/70 hidden flex-col items-center justify-center backdrop-blur-sm">
+          <div class="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mb-2"></div>
+          <span class="text-xs font-bold text-accent">AI Analyzing Chart...</span>
+        </div>
+      </div>
+    </div>
+
     <div>
       <label class="block text-[10px] font-mono text-muted uppercase mb-1">Analysis / Notes</label>
       <textarea id="sig-notes" rows="3" placeholder="MSS confirmed on 15m, targeting BSL..." class="w-full bg-bg border border-line rounded-lg px-3 py-2 text-sm text-white"></textarea>
@@ -846,6 +859,64 @@
       renderSignals();
     }
   }
+
+
+  // --- AI Chart Analysis ---
+  const AI_ENDPOINT = "PASTE_YOUR_APPS_SCRIPT_URL_HERE"; // Will be replaced
+
+  document.getElementById('sig-image-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+      const base64Data = event.target.result;
+      
+      // Show Preview & Loading
+      document.getElementById('sig-image-preview').src = base64Data;
+      document.getElementById('sig-image-preview-container').classList.remove('hidden');
+      document.getElementById('sig-image-loading').classList.remove('hidden');
+      document.getElementById('sig-image-loading').classList.add('flex');
+      
+      // Clear notes and show AI writing
+      const notesArea = document.getElementById('sig-notes');
+      notesArea.value = "🤖 AI is reading the chart structure...";
+      notesArea.disabled = true;
+
+      try {
+        const res = await fetch(AI_ENDPOINT, {
+          method: 'POST',
+          body: JSON.stringify({ 
+            action: 'analyze_chart', 
+            image: base64Data 
+          })
+        });
+        
+        const data = await res.json();
+        
+        if(data.error) throw new Error(data.error);
+        
+        // Populate notes with AI response
+        notesArea.value = data.analysis;
+        
+        // Auto-detect direction if AI mentions it
+        if(data.analysis.toLowerCase().includes('sell') || data.analysis.toLowerCase().includes('short')) {
+          setSigDir('SELL');
+        } else if(data.analysis.toLowerCase().includes('buy') || data.analysis.toLowerCase().includes('long')) {
+          setSigDir('BUY');
+        }
+
+      } catch (err) {
+        console.error(err);
+        notesArea.value = "Failed to analyze image. Please type your notes manually.";
+      } finally {
+        notesArea.disabled = false;
+        document.getElementById('sig-image-loading').classList.add('hidden');
+        document.getElementById('sig-image-loading').classList.remove('flex');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
 
   // --- Init ---
   renderDashboard();
