@@ -740,28 +740,38 @@
   }
 
 
-  function shareGlobalSignal(id) {
+  async function shareGlobalSignal(id) {
     const sig = globalSignals.find(s => s.id === id);
     if (!sig) return;
+    
     let statusEmoji = sig.result === 'win' ? '✅' : sig.result === 'loss' ? '❌' : '⏳';
-    const text = `${statusEmoji} *${sig.asset} ${sig.direction} SIGNAL* ${statusEmoji}\n\n🎯 Entry: ${sig.entry}\n🛑 SL: ${sig.sl}\n💰 TP: ${sig.tp}\n\n📝 Analysis:\n${sig.analysis || 'None'}\n\n📓 Track your trades at:\nhttps://gongolatechlab.github.io/trading-journal/`;
-    if (navigator.share) navigator.share({ title: 'Signal', text: text }).catch(console.error);
-    else { navigator.clipboard.writeText(text); alert('Signal copied!'); }
-  }
+    let text = `${statusEmoji} *${sig.asset} ${sig.direction} SIGNAL* ${statusEmoji}\n\n📊 Category: ${sig.category}\n🎯 Entry: ${sig.entry}\n🛑 Stop Loss: ${sig.sl}\n💰 Take Profit: ${sig.tp}\n\n📝 Analysis:\n${sig.analysis || 'No analysis provided.'}\n\n📓 Track your own trades at:\nhttps://gongolatechlab.github.io/trading-journal/`;
 
+    if (sig.image_url) {
+      try {
+        const response = await fetch(sig.image_url);
+        const blob = await response.blob();
+        const file = new File([blob], 'chart.jpg', { type: blob.type });
 
-  function toggleGlobalSignalImage(id) {
-    const container = document.getElementById(`g-img-container-${id}`);
-    const text = document.getElementById(`g-img-text-${id}`);
-    const icon = document.getElementById(`g-img-icon-${id}`);
-    if (container.classList.contains('hidden')) {
-      container.classList.remove('hidden');
-      text.innerText = 'Hide Chart';
-      icon.style.transform = 'rotate(180deg)';
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `${sig.asset} ${sig.direction} Signal`,
+            text: text
+          });
+          return;
+        }
+      } catch (err) {
+        console.log('File sharing failed, falling back to URL', err);
+      }
+      text += `\n\n📸 Chart: ${sig.image_url}`;
+    }
+
+    if (navigator.share) {
+      navigator.share({ title: `${sig.asset} ${sig.direction} Signal`, text: text }).catch(console.error);
     } else {
-      container.classList.add('hidden');
-      text.innerText = 'View Chart';
-      icon.style.transform = 'rotate(0deg)';
+      navigator.clipboard.writeText(text);
+      alert('Signal copied to clipboard!');
     }
   }
 
