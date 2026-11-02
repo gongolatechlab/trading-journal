@@ -207,41 +207,35 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-      <div>
+      <!-- Tile: Asset -->
+      <div class="bg-surface2 p-3 rounded-xl border border-line focus-within:border-accent transition-colors">
         <label class="block text-[10px] font-mono text-muted uppercase mb-1">Asset</label>
-        <input type="text" id="input-asset" placeholder="BTCUSD" required class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 font-mono uppercase text-white focus:outline-none focus:border-accent">
+        <input type="text" id="input-asset" placeholder="BTCUSD" required class="w-full bg-transparent font-mono text-lg font-bold uppercase text-white outline-none">
       </div>
-      <div>
+      <!-- Tile: Date -->
+      <div class="bg-surface2 p-3 rounded-xl border border-line focus-within:border-accent transition-colors">
         <label class="block text-[10px] font-mono text-muted uppercase mb-1">Date</label>
-        <input type="date" id="input-date" required class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 font-mono text-white focus:outline-none focus:border-accent">
+        <input type="date" id="input-date" required class="w-full bg-transparent font-mono text-sm font-bold text-white outline-none">
       </div>
-    </div>
-
-    <div>
-      <label class="block text-[10px] font-mono text-muted uppercase mb-1">Direction</label>
-      <div class="grid grid-cols-2 gap-2">
-        <button type="button" onclick="setDirection('BUY')" id="btn-buy" class="py-3 rounded-lg border border-line bg-bg font-bold text-sm transition-all flex items-center justify-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-win"></div> BUY
-        </button>
-        <button type="button" onclick="setDirection('SELL')" id="btn-sell" class="py-3 rounded-lg border border-line bg-bg font-bold text-sm transition-all flex items-center justify-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-loss"></div> SELL
-        </button>
+      
+      <!-- Tile: Direction -->
+      <div class="col-span-2 bg-surface2 p-2 rounded-xl border border-line flex gap-2">
+        <button type="button" onclick="setDirection('BUY')" id="btn-buy" class="flex-1 py-3 rounded-lg border border-line bg-bg font-bold text-sm transition-all flex items-center justify-center gap-2"><div class="w-2 h-2 rounded-full bg-win"></div> BUY</button>
+        <button type="button" onclick="setDirection('SELL')" id="btn-sell" class="flex-1 py-3 rounded-lg border border-line bg-bg font-bold text-sm transition-all flex items-center justify-center gap-2"><div class="w-2 h-2 rounded-full bg-loss"></div> SELL</button>
+        <input type="hidden" id="input-direction" value="BUY">
       </div>
-      <input type="hidden" id="input-direction" value="BUY">
-    </div>
 
-    <div class="grid grid-cols-2 gap-3">
-      <div>
+      <!-- Tile: Result -->
+      <div class="bg-surface2 p-3 rounded-xl border border-line focus-within:border-accent transition-colors">
         <label class="block text-[10px] font-mono text-muted uppercase mb-1">Result</label>
-        <select id="input-result" class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-accent">
-          <option value="win">Win</option>
-          <option value="loss">Loss</option>
-          <option value="be">Break Even</option>
+        <select id="input-result" class="w-full bg-transparent font-mono text-lg font-bold text-white outline-none appearance-none">
+          <option value="win">Win</option><option value="loss">Loss</option><option value="be">Break Even</option>
         </select>
       </div>
-      <div id="amount-container">
+      <!-- Tile: Amount -->
+      <div id="amount-container" class="bg-surface2 p-3 rounded-xl border border-line focus-within:border-accent transition-colors">
         <label class="block text-[10px] font-mono text-muted uppercase mb-1">Amount ($)</label>
-        <input type="number" id="input-amount" step="0.01" placeholder="0.00" class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 font-mono text-white focus:outline-none focus:border-accent">
+        <input type="number" id="input-amount" step="0.01" placeholder="0.00" class="w-full bg-transparent font-mono text-lg font-bold text-white outline-none">
       </div>
     </div>
 
