@@ -32,23 +32,20 @@
   .glass { background: rgba(11, 12, 16, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
   .ring-chart { background: conic-gradient(var(--color-win) calc(var(--p)*1%), var(--color-surface) 0); }
   .active-chip { background-color: var(--color-accent) !important; color: var(--color-bg) !important; border-color: var(--color-accent) !important; }
-  input, select, textarea { font-size: 16px !important; } /* Prevents iOS auto-zoom */
-
-.sig-card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.sig-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-line); padding-bottom: 12px; }
-.sig-asset { font-size: 18px; font-weight: 700; font-family: var(--font-mono); }
-.sig-badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
-.sig-badge.buy { background: rgba(0,255,102,0.1); color: var(--color-win); border: 1px solid rgba(0,255,102,0.3); }
-.sig-badge.sell { background: rgba(255,59,48,0.1); color: var(--color-loss); border: 1px solid rgba(255,59,48,0.3); }
-.sig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
-.sig-label { font-size: 10px; font-family: var(--font-mono); color: var(--color-muted); text-transform: uppercase; }
-.sig-val { font-size: 14px; font-family: var(--font-mono); font-weight: 700; color: white; }
-
+  input, select, textarea { font-size: 16px !important; }
+  .sig-card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .sig-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-line); padding-bottom: 12px; }
+  .sig-asset { font-size: 18px; font-weight: 700; font-family: var(--font-mono); }
+  .sig-badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
+  .sig-badge.buy { background: rgba(0,255,102,0.1); color: var(--color-win); border: 1px solid rgba(0,255,102,0.3); }
+  .sig-badge.sell { background: rgba(255,59,48,0.1); color: var(--color-loss); border: 1px solid rgba(255,59,48,0.3); }
+  .sig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+  .sig-label { font-size: 10px; font-family: var(--font-mono); color: var(--color-muted); text-transform: uppercase; }
+  .sig-val { font-size: 14px; font-family: var(--font-mono); font-weight: 700; color: white; }
 </style>
 </head>
 <body class="bg-bg text-text font-display antialiased overflow-x-hidden">
 
-<!-- Install Toast -->
 <div id="install-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm hidden">
   <div class="bg-surface border border-line rounded-xl p-4 shadow-2xl flex items-center justify-between gap-4">
     <div>
@@ -62,7 +59,6 @@
   </div>
 </div>
 
-<!-- Header -->
 <header class="sticky top-0 z-30 glass border-b border-line">
   <div class="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
     <div class="flex items-center gap-2">
@@ -80,9 +76,7 @@
   </div>
 </header>
 
-<!-- Main Dashboard -->
 <main class="max-w-4xl mx-auto p-4 space-y-4 pb-24">
-  <!-- P&L Hero -->
   <div class="bg-surface border border-line rounded-xl p-5">
     <p class="text-[10px] font-mono text-muted uppercase tracking-wider mb-1">Net Profit & Loss</p>
     <p id="metric-net" class="text-4xl font-mono font-bold text-white mb-4">$0.00</p>
@@ -98,7 +92,6 @@
     </div>
   </div>
 
-  <!-- Stats Grid -->
   <div class="grid grid-cols-2 gap-3">
     <div class="bg-surface border border-line rounded-xl p-4 flex justify-between items-center">
       <div>
@@ -123,17 +116,15 @@
     </div>
   </div>
 
-  <!-- Recent Trades List -->
   <div class="bg-surface border border-line rounded-xl overflow-hidden">
     <div class="p-4 border-b border-line flex justify-between items-center">
       <h2 class="font-bold text-sm uppercase tracking-wider">Recent Trades</h2>
-      <span id="trade-count" class="text-xs font-mono text-muted">0 shown</span>
+      <span id="trade-count" class="text-xs font-mono text-muted">0 total</span>
     </div>
     <div id="trade-list" class="divide-y divide-line max-h-[300px] overflow-y-auto"></div>
   </div>
 </main>
 
-<!-- Bottom Nav -->
 <nav class="fixed bottom-0 left-0 right-0 z-40 glass border-t border-line pb-safe">
   <div class="max-w-md mx-auto grid grid-cols-3 gap-2 px-4 py-3">
     <button onclick="toggleJournal()" class="flex flex-col items-center gap-1 text-muted hover:text-white transition-colors">
@@ -151,8 +142,45 @@
   </div>
 </nav>
 
+<div id="journal-page" class="fixed inset-0 z-50 bg-bg hidden flex-col overflow-y-auto pb-24">
+  <div class="glass border-b border-line p-4 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleJournal()" class="p-2 bg-surface2 rounded-lg hover:bg-surface transition-colors">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <h2 class="font-bold text-lg">Journal & Review</h2>
+    </div>
+  </div>
+  
+  <div class="max-w-2xl mx-auto w-full p-4 space-y-4">
+    <div class="bg-surface border border-line rounded-xl p-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="cal-month" class="font-bold text-white">Month</h3>
+        <div class="flex gap-2">
+          <button onclick="changeMonth(-1)" class="p-1.5 bg-surface2 rounded border border-line hover:border-accent"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg></button>
+          <button onclick="changeMonth(1)" class="p-1.5 bg-surface2 rounded border border-line hover:border-accent"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+      <div class="grid grid-cols-7 gap-1 text-center mb-2 text-[10px] font-mono text-muted">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <div id="calendar-grid" class="grid grid-cols-7 gap-1"></div>
+    </div>
 
-<!-- Signals Full Page -->
+    <div id="daily-detail" class="bg-surface border border-line rounded-xl p-4 hidden">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h3 id="detail-date" class="font-bold text-lg text-white">Date</h3>
+          <p id="detail-pnl" class="font-mono text-sm mt-1">$0.00</p>
+        </div>
+        <button onclick="editDailyNote()" class="px-3 py-1.5 bg-surface2 border border-line rounded-lg text-xs font-bold hover:border-accent transition-colors">Edit Note</button>
+      </div>
+      <div id="detail-trades" class="space-y-2 mb-4"></div>
+      <div id="detail-notes" class="bg-surface2 p-3 rounded-lg text-sm italic text-muted border border-line">No notes for this day.</div>
+    </div>
+  </div>
+</div>
+
 <div id="signals-page" class="fixed inset-0 z-50 bg-bg hidden flex-col overflow-y-auto pb-24">
   <div class="glass border-b border-line p-4 flex items-center justify-between sticky top-0 z-10">
     <div class="flex items-center gap-3">
@@ -176,49 +204,6 @@
   </div>
 </div>
 
-<!-- Journal Full Page -->
-<div id="journal-page" class="fixed inset-0 z-50 bg-bg hidden flex-col overflow-y-auto pb-24">
-  <div class="glass border-b border-line p-4 flex items-center justify-between sticky top-0 z-10">
-    <div class="flex items-center gap-3">
-      <button onclick="toggleJournal()" class="p-2 bg-surface2 rounded-lg hover:bg-surface transition-colors">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-      </button>
-      <h2 class="font-bold text-lg">Journal & Review</h2>
-    </div>
-  </div>
-  
-  <div class="max-w-2xl mx-auto w-full p-4 space-y-4">
-    <!-- Calendar Card -->
-    <div class="bg-surface border border-line rounded-xl p-4">
-      <div class="flex justify-between items-center mb-4">
-        <h3 id="cal-month" class="font-bold text-white">Month</h3>
-        <div class="flex gap-2">
-          <button onclick="changeMonth(-1)" class="p-1.5 bg-surface2 rounded border border-line hover:border-accent"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg></button>
-          <button onclick="changeMonth(1)" class="p-1.5 bg-surface2 rounded border border-line hover:border-accent"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
-        </div>
-      </div>
-      <div class="grid grid-cols-7 gap-1 text-center mb-2 text-[10px] font-mono text-muted">
-        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
-      </div>
-      <div id="calendar-grid" class="grid grid-cols-7 gap-1"></div>
-    </div>
-
-    <!-- Daily Detail -->
-    <div id="daily-detail" class="bg-surface border border-line rounded-xl p-4 hidden">
-      <div class="flex justify-between items-start mb-4">
-        <div>
-          <h3 id="detail-date" class="font-bold text-lg text-white">Date</h3>
-          <p id="detail-pnl" class="font-mono text-sm mt-1">$0.00</p>
-        </div>
-        <button onclick="editDailyNote()" class="px-3 py-1.5 bg-surface2 border border-line rounded-lg text-xs font-bold hover:border-accent transition-colors">Edit Note</button>
-      </div>
-      <div id="detail-trades" class="space-y-2 mb-4"></div>
-      <div id="detail-notes" class="bg-surface2 p-3 rounded-lg text-sm italic text-muted border border-line">No notes for this day.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Log Trade Modal -->
 <dialog id="trade-modal" class="bg-surface text-text w-full max-w-lg mt-auto mb-0 md:m-auto rounded-t-2xl md:rounded-2xl border border-line p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm">
   <form id="trade-form" class="p-5 flex flex-col gap-4 max-h-[90vh] overflow-y-auto pb-safe">
     <div class="flex justify-between items-center mb-2">
@@ -226,7 +211,6 @@
       <button type="button" onclick="toggleTradeModal()" class="p-2 bg-surface2 rounded-full text-muted hover:text-white"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
     </div>
 
-    <!-- Asset & Date -->
     <div class="grid grid-cols-2 gap-3">
       <div>
         <label class="block text-[10px] font-mono text-muted uppercase mb-1">Asset</label>
@@ -238,7 +222,6 @@
       </div>
     </div>
 
-    <!-- Direction (Buy/Sell) -->
     <div>
       <label class="block text-[10px] font-mono text-muted uppercase mb-1">Direction</label>
       <div class="grid grid-cols-2 gap-2">
@@ -252,7 +235,6 @@
       <input type="hidden" id="input-direction" value="BUY">
     </div>
 
-    <!-- Result & Amount -->
     <div class="grid grid-cols-2 gap-3">
       <div>
         <label class="block text-[10px] font-mono text-muted uppercase mb-1">Result</label>
@@ -268,7 +250,6 @@
       </div>
     </div>
 
-    <!-- Setup Chips -->
     <div>
       <label class="block text-[10px] font-mono text-muted uppercase mb-2">Setup / Strategy</label>
       <div class="flex flex-wrap gap-2" id="setup-chips">
@@ -280,7 +261,6 @@
       </div>
     </div>
 
-    <!-- Mistake Chips -->
     <div>
       <label class="block text-[10px] font-mono text-muted uppercase mb-2">Mistake</label>
       <div class="flex flex-wrap gap-2" id="mistake-chips">
@@ -291,7 +271,6 @@
       </div>
     </div>
 
-    <!-- Notes -->
     <div>
       <label class="block text-[10px] font-mono text-muted uppercase mb-1">Notes</label>
       <textarea id="input-notes" rows="2" placeholder="How did the trade go?" class="w-full bg-bg border border-line rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent"></textarea>
@@ -301,8 +280,6 @@
   </form>
 </dialog>
 
-
-<!-- Signal Modal -->
 <dialog id="signal-modal" class="bg-surface text-text w-full max-w-lg mt-auto mb-0 md:m-auto rounded-t-2xl md:rounded-2xl border border-line p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm">
   <form id="signal-form" class="p-5 flex flex-col gap-4 max-h-[90vh] overflow-y-auto pb-safe">
     <div class="flex justify-between items-center mb-2">
@@ -348,7 +325,6 @@
       </div>
     </div>
 
-
     <div>
       <label class="block text-[10px] font-mono text-muted uppercase mb-1">Chart Image (AI Analyze)</label>
       <input type="file" id="sig-image-input" accept="image/*" class="w-full bg-bg border border-line rounded-lg px-3 py-2 text-sm text-muted file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-surface2 file:text-white hover:file:bg-surface transition-all">
@@ -370,7 +346,6 @@
   </form>
 </dialog>
 
-<!-- Settings Modal -->
 <dialog id="settings-modal" class="bg-surface text-text w-full max-w-sm mt-auto mb-0 md:m-auto rounded-t-2xl md:rounded-2xl border border-line p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm">
   <form id="settings-form" class="p-5 flex flex-col gap-4">
     <div class="flex justify-between items-center mb-2">
@@ -386,7 +361,6 @@
   </form>
 </dialog>
 
-<!-- Daily Note Modal -->
 <dialog id="note-modal" class="bg-surface text-text w-full max-w-sm mt-auto mb-0 md:m-auto rounded-t-2xl md:rounded-2xl border border-line p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm">
   <form id="note-form" class="p-5 flex flex-col gap-4">
     <div class="flex justify-between items-center mb-2">
@@ -420,7 +394,6 @@
     document.getElementById('install-toast').classList.add('hidden');
   });
 
-  // Register Service Worker
   if ('serviceWorker' in navigator) {
     const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => self.clients.claim()); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));`;
     const blob = new Blob([swCode], {type: 'application/javascript'});
@@ -431,13 +404,18 @@
   let trades = JSON.parse(localStorage.getItem('gongola_trades')) || [];
   let notes = JSON.parse(localStorage.getItem('gongola_notes')) || {};
   let settings = JSON.parse(localStorage.getItem('gongola_settings')) || { startingBalance: 10000 };
+  let signals = JSON.parse(localStorage.getItem('gongola_signals')) || [];
   
   let currentDirection = 'BUY';
   let currentSetup = 'Breakout';
   let currentMistake = 'None';
+  let currentSignalCat = 'Forex';
+  let currentSigDir = 'BUY';
   
   let calDate = new Date();
   let selectedDate = new Date().toISOString().split('T')[0];
+
+  const AI_ENDPOINT = "https://script.google.com/macros/s/AKfycbyko4PK_4356wXeO-lc5MBaqoFGcWfAInkQOmEM0SOGbkRueniv-MIb9zrlZE16Vojr2Q/exec";
 
   // --- Formatting ---
   const money = (val, sign = false) => {
@@ -446,18 +424,13 @@
     if (val > 0 && sign) return '+' + str;
     return str;
   };
-
-  const formatDate = (iso) => {
-    return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-  };
+  const formatDate = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
   // --- Trade Modal Logic ---
   function toggleTradeModal() {
     const modal = document.getElementById('trade-modal');
-    if (modal.open) {
-      modal.close();
-    } else {
-      // Reset form
+    if (modal.open) modal.close();
+    else {
       document.getElementById('trade-form').reset();
       document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
       setDirection('BUY');
@@ -485,13 +458,9 @@
   function selectChip(type, val) {
     if (type === 'setup') currentSetup = val;
     if (type === 'mistake') currentMistake = val;
-    
     document.querySelectorAll(`#${type}-chips .chip`).forEach(c => {
-      if (c.innerText.trim() === val) {
-        c.classList.add('active-chip');
-      } else {
-        c.classList.remove('active-chip');
-      }
+      if (c.innerText.trim() === val) c.classList.add('active-chip');
+      else c.classList.remove('active-chip');
     });
   }
 
@@ -513,19 +482,7 @@
     if (result === 'win') pnl = amount;
     if (result === 'loss') pnl = -amount;
 
-    const newTrade = {
-      id: Date.now().toString(),
-      date: date,
-      asset: asset,
-      direction: currentDirection,
-      result: result,
-      pnl: pnl,
-      setup: currentSetup,
-      mistake: currentMistake,
-      notes: notesTxt
-    };
-
-    trades.push(newTrade);
+    trades.push({ id: Date.now().toString(), date, asset, direction: currentDirection, result, pnl, setup: currentSetup, mistake: currentMistake, notes: notesTxt });
     saveData();
     toggleTradeModal();
     renderDashboard();
@@ -549,24 +506,22 @@
 
     document.getElementById('metric-net').innerText = money(totalPnl, true);
     document.getElementById('metric-net').className = `text-4xl font-mono font-bold mb-4 ${totalPnl > 0 ? 'text-win' : totalPnl < 0 ? 'text-loss' : 'text-white'}`;
-    
     document.getElementById('metric-bal').innerText = money(balance);
     document.getElementById('metric-growth').innerText = (growth > 0 ? '+' : '') + growth.toFixed(1) + '%';
     document.getElementById('metric-growth').className = `text-lg font-mono font-bold ${growth >= 0 ? 'text-win' : 'text-loss'}`;
-    
     document.getElementById('metric-wr').innerText = winRate + '%';
     document.getElementById('wr-ring').style.setProperty('--p', winRate);
     document.getElementById('wr-text').innerText = `${wins.length}W ${losses.length}L`;
-    
     document.getElementById('metric-pf').innerText = pf.toFixed(2);
     document.getElementById('metric-avg-win').innerText = money(avgWin);
     document.getElementById('metric-avg-loss').innerText = '-' + money(avgLoss);
 
-    // Render List
     const list = document.getElementById('trade-list');
     list.innerHTML = '';
     const recent = [...trades].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
     
+    document.getElementById('trade-count').innerText = `${trades.length} total`;
+
     if(recent.length === 0) {
       list.innerHTML = '<div class="p-6 text-center text-muted text-sm">No trades yet. Tap Log Trade to start.</div>';
     } else {
@@ -615,14 +570,11 @@
     const daysInMonth = new Date(y, m + 1, 0).getDate();
     
     document.getElementById('cal-month').innerText = calDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-    
     const grid = document.getElementById('calendar-grid');
     grid.innerHTML = '';
     
-    // Empty slots
     for(let i=0; i<firstDay; i++) grid.innerHTML += `<div class="aspect-square"></div>`;
     
-    // Days
     for(let d=1; d<=daysInMonth; d++) {
       const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
       const dayTrades = trades.filter(t => t.date === dateStr);
@@ -643,7 +595,6 @@
         </button>
       `;
     }
-    
     renderDayDetail();
   }
 
@@ -725,10 +676,10 @@
   });
 
   function clearAllData() {
-    if (confirm('WARNING: This will permanently delete all your trades and notes. Are you sure?')) {
-      trades = [];
-      notes = {};
+    if (confirm('WARNING: This will permanently delete all your trades, notes, and signals. Are you sure?')) {
+      trades = []; notes = {}; signals = [];
       saveData();
+      localStorage.removeItem('gongola_signals');
       toggleSettings();
       renderDashboard();
     }
@@ -753,12 +704,7 @@
     localStorage.setItem('gongola_settings', JSON.stringify(settings));
   }
 
-
   // --- Signals Logic ---
-  let signals = JSON.parse(localStorage.getItem('gongola_signals')) || [];
-  let currentSignalCat = 'Forex';
-  let currentSigDir = 'BUY';
-
   function toggleSignals() {
     const page = document.getElementById('signals-page');
     if (page.classList.contains('hidden')) {
@@ -817,6 +763,9 @@
       document.getElementById('signal-form').reset();
       document.getElementById('sig-cat').value = currentSignalCat;
       setSigDir('BUY');
+      document.getElementById('sig-image-preview-container').classList.add('hidden');
+      document.getElementById('sig-notes').value = '';
+      document.getElementById('sig-notes').disabled = false;
       modal.showModal();
     }
   }
@@ -860,16 +809,13 @@
     }
   }
 
-
-  // --- AI Chart Analysis ---
-  const AI_ENDPOINT = "https://script.google.com/macros/s/AKfycbyko4PK_4356wXeO-lc5MBaqoFGcWfAInkQOmEM0SOGbkRueniv-MIb9zrlZE16Vojr2Q/exec"; // Will be replaced
-
+  // --- AI Image Analysis ---
   document.getElementById('sig-image-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = async function(event) {
+    reader.onload = function(event) {
       const img = new Image();
       img.onload = async function() {
         // Compress Image
@@ -880,17 +826,13 @@
         canvas.height = img.height * scale;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
-        // Convert to Base64 (JPEG at 70% quality)
         const base64Data = canvas.toDataURL('image/jpeg', 0.7);
 
-        // Show Preview & Loading
         document.getElementById('sig-image-preview').src = base64Data;
         document.getElementById('sig-image-preview-container').classList.remove('hidden');
         document.getElementById('sig-image-loading').classList.remove('hidden');
         document.getElementById('sig-image-loading').classList.add('flex');
         
-        // Clear notes and show AI writing
         const notesArea = document.getElementById('sig-notes');
         notesArea.value = "🤖 AI is reading the chart structure...";
         notesArea.disabled = true;
@@ -898,34 +840,27 @@
         try {
           const res = await fetch(AI_ENDPOINT, {
             method: 'POST',
-            body: JSON.stringify({ 
-              action: 'analyze_chart', 
-              image: base64Data 
-            })
+            body: JSON.stringify({ action: 'analyze_chart', image: base64Data })
           });
-        
-        const data = await res.json();
-        
-        if(data.error) throw new Error(data.error);
-        
-        // Populate notes with AI response
-        notesArea.value = data.analysis;
-        
-        // Auto-detect direction if AI mentions it
-        if(data.analysis.toLowerCase().includes('sell') || data.analysis.toLowerCase().includes('short')) {
-          setSigDir('SELL');
-        } else if(data.analysis.toLowerCase().includes('buy') || data.analysis.toLowerCase().includes('long')) {
-          setSigDir('BUY');
+          const data = await res.json();
+          if(data.error) throw new Error(data.error);
+          
+          notesArea.value = data.analysis;
+          if(data.analysis.toLowerCase().includes('sell') || data.analysis.toLowerCase().includes('short')) {
+            setSigDir('SELL');
+          } else if(data.analysis.toLowerCase().includes('buy') || data.analysis.toLowerCase().includes('long')) {
+            setSigDir('BUY');
+          }
+        } catch (err) {
+          console.error(err);
+          notesArea.value = "Failed to analyze image. Please type your notes manually.";
+        } finally {
+          notesArea.disabled = false;
+          document.getElementById('sig-image-loading').classList.add('hidden');
+          document.getElementById('sig-image-loading').classList.remove('flex');
         }
-
-      } catch (err) {
-        console.error(err);
-        notesArea.value = "Failed to analyze image. Please type your notes manually.";
-      } finally {
-        notesArea.disabled = false;
-        document.getElementById('sig-image-loading').classList.add('hidden');
-        document.getElementById('sig-image-loading').classList.remove('flex');
-      }
+      };
+      img.src = event.target.result;
     };
     reader.readAsDataURL(file);
   });
