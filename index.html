@@ -8,6 +8,7 @@
 <link rel="manifest" href='data:application/manifest+json,{"name":"Gongola Journal","short_name":"Journal","start_url":"./","display":"standalone","background_color":"#0B0C10","theme_color":"#0B0C10","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2933/2933931.png","sizes":"192x192","type":"image/png"}]}'>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -33,17 +34,7 @@
   .ring-chart { background: conic-gradient(var(--color-win) calc(var(--p)*1%), var(--color-surface) 0); }
   .active-chip { background-color: var(--color-accent) !important; color: var(--color-bg) !important; border-color: var(--color-accent) !important; }
   input, select, textarea { font-size: 16px !important; }
-  .sig-card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-  .sig-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-line); padding-bottom: 12px; }
-  .sig-asset { font-size: 18px; font-weight: 700; font-family: var(--font-mono); }
-  .sig-badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
-  .sig-badge.buy { background: rgba(0,255,102,0.1); color: var(--color-win); border: 1px solid rgba(0,255,102,0.3); }
-  .sig-badge.sell { background: rgba(255,59,48,0.1); color: var(--color-loss); border: 1px solid rgba(255,59,48,0.3); }
-  .sig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
-  .sig-label { font-size: 10px; font-family: var(--font-mono); color: var(--color-muted); text-transform: uppercase; }
-  .sig-val { font-size: 14px; font-family: var(--font-mono); font-weight: 700; color: white; }
 </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-bg text-text font-display antialiased overflow-x-hidden">
 
@@ -188,20 +179,23 @@
       <button onclick="toggleSignals()" class="p-2 bg-surface2 rounded-lg hover:bg-surface transition-colors">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <h2 class="font-bold text-lg">Trading Signals</h2>
+      <h2 class="font-bold text-lg">Global Signals</h2>
     </div>
-    <button onclick="toggleSignalModal()" class="px-3 py-1.5 bg-win text-bg font-bold text-xs rounded-lg shadow-[0_0_10px_rgba(0,255,102,0.3)]">+ Post</button>
+    <a href="https://gongolatechlab.github.io/gongola-ict-hub/signals/" target="_blank" class="px-3 py-1.5 bg-surface2 border border-line text-text font-bold text-xs rounded-lg hover:border-accent transition-colors">Post Signal</a>
   </div>
   
   <div class="max-w-2xl mx-auto w-full p-4 space-y-4">
     <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" id="signal-tabs">
-      <button onclick="setSignalCategory('Forex')" class="sig-tab active-chip px-4 py-2 rounded-full border border-line bg-bg text-xs font-bold text-muted whitespace-nowrap">Forex</button>
+      <button onclick="setSignalCategory('All')" class="sig-tab active-chip px-4 py-2 rounded-full border border-line bg-bg text-xs font-bold text-muted whitespace-nowrap">All</button>
+      <button onclick="setSignalCategory('Forex')" class="sig-tab px-4 py-2 rounded-full border border-line bg-bg text-xs font-bold text-muted whitespace-nowrap">Forex</button>
       <button onclick="setSignalCategory('Crypto')" class="sig-tab px-4 py-2 rounded-full border border-line bg-bg text-xs font-bold text-muted whitespace-nowrap">Crypto</button>
       <button onclick="setSignalCategory('Indices')" class="sig-tab px-4 py-2 rounded-full border border-line bg-bg text-xs font-bold text-muted whitespace-nowrap">Indices</button>
       <button onclick="setSignalCategory('Commodities')" class="sig-tab px-4 py-2 rounded-full border border-line bg-bg text-xs font-bold text-muted whitespace-nowrap">Commodities</button>
     </div>
     
-    <div id="signal-list" class="space-y-3"></div>
+    <div id="global-signal-list" class="space-y-3">
+      <div class="text-center text-muted text-sm p-8">Loading global signals...</div>
+    </div>
   </div>
 </div>
 
@@ -281,78 +275,6 @@
   </form>
 </dialog>
 
-<dialog id="signal-modal" class="bg-surface text-text w-full max-w-lg mt-auto mb-0 md:m-auto rounded-t-2xl md:rounded-2xl border border-line p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm">
-  <form id="signal-form" class="p-5 flex flex-col gap-4 max-h-[90vh] overflow-y-auto pb-safe">
-    <div class="flex justify-between items-center mb-2">
-      <h2 class="text-xl font-bold">Post Signal</h2>
-      <button type="button" onclick="toggleSignalModal()" class="p-2 bg-surface2 rounded-full text-muted hover:text-white"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
-    </div>
-
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-[10px] font-mono text-muted uppercase mb-1">Category</label>
-        <select id="sig-cat" class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 text-white">
-          <option>Forex</option><option>Crypto</option><option>Indices</option><option>Commodities</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-[10px] font-mono text-muted uppercase mb-1">Asset</label>
-        <input type="text" id="sig-asset" placeholder="XAUUSD" required class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 font-mono uppercase text-white">
-      </div>
-    </div>
-
-    
-    <div>
-      <label class="block text-[10px] font-mono text-muted uppercase mb-1">Date & Time</label>
-      <input type="datetime-local" id="sig-datetime" required class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 font-mono text-sm text-white">
-    </div>
-
-    <div class="grid grid-cols-2 gap-2">
-      <button type="button" onclick="setSigDir('BUY')" id="sig-btn-buy" class="py-3 rounded-lg border border-win bg-win/10 text-win font-bold text-sm transition-all flex justify-center items-center gap-2">
-        <div class="w-2 h-2 rounded-full bg-win"></div> BUY
-      </button>
-      <button type="button" onclick="setSigDir('SELL')" id="sig-btn-sell" class="py-3 rounded-lg border border-line bg-bg text-muted font-bold text-sm transition-all flex justify-center items-center gap-2">
-        <div class="w-2 h-2 rounded-full bg-loss"></div> SELL
-      </button>
-      <input type="hidden" id="sig-direction" value="BUY">
-    </div>
-
-    <div class="grid grid-cols-3 gap-2">
-      <div>
-        <label class="block text-[10px] font-mono text-muted uppercase mb-1">Entry</label>
-        <input type="number" id="sig-entry" step="any" required class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 font-mono text-white">
-      </div>
-      <div>
-        <label class="block text-[10px] font-mono text-muted uppercase mb-1">SL</label>
-        <input type="number" id="sig-sl" step="any" required class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 font-mono text-white">
-      </div>
-      <div>
-        <label class="block text-[10px] font-mono text-muted uppercase mb-1">TP</label>
-        <input type="number" id="sig-tp" step="any" required class="w-full bg-bg border border-line rounded-lg px-3 py-2.5 font-mono text-white">
-      </div>
-    </div>
-
-    <div>
-      <label class="block text-[10px] font-mono text-muted uppercase mb-1">Chart Image (AI Analyze)</label>
-      <input type="file" id="sig-image-input" accept="image/*" class="w-full bg-bg border border-line rounded-lg px-3 py-2 text-sm text-muted file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-surface2 file:text-white hover:file:bg-surface transition-all">
-      <div id="sig-image-preview-container" class="hidden mt-2 relative rounded-lg overflow-hidden border border-line">
-        <img id="sig-image-preview" class="w-full h-32 object-cover">
-        <div id="sig-image-loading" class="absolute inset-0 bg-black/70 hidden flex-col items-center justify-center backdrop-blur-sm">
-          <div class="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mb-2"></div>
-          <span class="text-xs font-bold text-accent">AI Analyzing Chart...</span>
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <label class="block text-[10px] font-mono text-muted uppercase mb-1">Analysis / Notes</label>
-      <textarea id="sig-notes" rows="3" placeholder="MSS confirmed on 15m, targeting BSL..." class="w-full bg-bg border border-line rounded-lg px-3 py-2 text-sm text-white"></textarea>
-    </div>
-
-    <button type="submit" class="w-full py-3.5 bg-accent text-bg font-bold text-lg rounded-xl mt-2 hover:brightness-110">Publish Signal</button>
-  </form>
-</dialog>
-
 <dialog id="settings-modal" class="bg-surface text-text w-full max-w-sm mt-auto mb-0 md:m-auto rounded-t-2xl md:rounded-2xl border border-line p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm">
   <form id="settings-form" class="p-5 flex flex-col gap-4">
     <div class="flex justify-between items-center mb-2">
@@ -391,9 +313,7 @@
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        document.getElementById('install-toast').classList.add('hidden');
-      }
+      if (outcome === 'accepted') document.getElementById('install-toast').classList.add('hidden');
       deferredPrompt = null;
     }
   });
@@ -411,18 +331,13 @@
   let trades = JSON.parse(localStorage.getItem('gongola_trades')) || [];
   let notes = JSON.parse(localStorage.getItem('gongola_notes')) || {};
   let settings = JSON.parse(localStorage.getItem('gongola_settings')) || { startingBalance: 10000 };
-  let signals = JSON.parse(localStorage.getItem('gongola_signals')) || [];
   
   let currentDirection = 'BUY';
   let currentSetup = 'Breakout';
   let currentMistake = 'None';
-  let currentSignalCat = 'Forex';
-  let currentSigDir = 'BUY';
   
   let calDate = new Date();
   let selectedDate = new Date().toISOString().split('T')[0];
-
-  const AI_ENDPOINT = "https://script.google.com/macros/s/AKfycbw4VeiNl7tREkr1EVGriYymPAOq2vEoBlKrM57rg3O_NvQ-JqvxBK7-R6kb1T7jGXra/exec";
 
   // --- Formatting ---
   const money = (val, sign = false) => {
@@ -433,70 +348,7 @@
   };
   const formatDate = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
-  // --- Trade Modal Logic ---
-  function toggleTradeModal() {
-    const modal = document.getElementById('trade-modal');
-    if (modal.open) modal.close();
-    else {
-      document.getElementById('trade-form').reset();
-      document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
-      setDirection('BUY');
-      selectChip('setup', 'Breakout');
-      selectChip('mistake', 'None');
-      document.getElementById('amount-container').style.display = 'block';
-      modal.showModal();
-    }
-  }
-
-  function setDirection(dir) {
-    currentDirection = dir;
-    document.getElementById('input-direction').value = dir;
-    const b = document.getElementById('btn-buy');
-    const s = document.getElementById('btn-sell');
-    if (dir === 'BUY') {
-      b.className = 'py-3 rounded-lg border border-win bg-win/10 text-win font-bold text-sm transition-all flex items-center justify-center gap-2';
-      s.className = 'py-3 rounded-lg border border-line bg-bg text-muted font-bold text-sm transition-all flex items-center justify-center gap-2';
-    } else {
-      s.className = 'py-3 rounded-lg border border-loss bg-loss/10 text-loss font-bold text-sm transition-all flex items-center justify-center gap-2';
-      b.className = 'py-3 rounded-lg border border-line bg-bg text-muted font-bold text-sm transition-all flex items-center justify-center gap-2';
-    }
-  }
-
-  function selectChip(type, val) {
-    if (type === 'setup') currentSetup = val;
-    if (type === 'mistake') currentMistake = val;
-    document.querySelectorAll(`#${type}-chips .chip`).forEach(c => {
-      if (c.innerText.trim() === val) c.classList.add('active-chip');
-      else c.classList.remove('active-chip');
-    });
-  }
-
-  document.getElementById('input-result').addEventListener('change', (e) => {
-    document.getElementById('amount-container').style.display = e.target.value === 'be' ? 'none' : 'block';
-  });
-
-  document.getElementById('trade-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const asset = document.getElementById('input-asset').value.toUpperCase().trim();
-    const date = document.getElementById('input-date').value;
-    const result = document.getElementById('input-result').value;
-    const amount = Math.abs(parseFloat(document.getElementById('input-amount').value) || 0);
-    const notesTxt = document.getElementById('input-notes').value.trim();
-
-    if (!asset || (result !== 'be' && !amount)) return alert('Please fill required fields');
-
-    let pnl = 0;
-    if (result === 'win') pnl = amount;
-    if (result === 'loss') pnl = -amount;
-
-    trades.push({ id: Date.now().toString(), date, asset, direction: currentDirection, result, pnl, setup: currentSetup, mistake: currentMistake, notes: notesTxt });
-    saveData();
-    toggleTradeModal();
-    renderDashboard();
-    if (document.getElementById('journal-page').classList.contains('flex')) renderJournal();
-  });
-
-  // --- Dashboard Rendering ---
+  // --- Dashboard ---
   function renderDashboard() {
     const totalPnl = trades.reduce((sum, t) => sum + t.pnl, 0);
     const wins = trades.filter(t => t.pnl > 0);
@@ -526,7 +378,6 @@
     const list = document.getElementById('trade-list');
     list.innerHTML = '';
     const recent = [...trades].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-    
     document.getElementById('trade-count').innerText = `${trades.length} total`;
 
     if(recent.length === 0) {
@@ -552,7 +403,7 @@
     }
   }
 
-  // --- Journal Page Logic ---
+  // --- Journal ---
   function toggleJournal() {
     const page = document.getElementById('journal-page');
     if (page.classList.contains('hidden')) {
@@ -647,7 +498,7 @@
     }
   }
 
-  // --- Notes Modal ---
+  // --- Notes ---
   function editDailyNote() {
     document.getElementById('note-modal-date').innerText = formatDate(selectedDate);
     document.getElementById('note-text').value = notes[selectedDate] || '';
@@ -662,6 +513,69 @@
     saveData();
     document.getElementById('note-modal').close();
     renderDayDetail();
+  });
+
+  // --- Trade Modal ---
+  function toggleTradeModal() {
+    const modal = document.getElementById('trade-modal');
+    if (modal.open) modal.close();
+    else {
+      document.getElementById('trade-form').reset();
+      document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+      setDirection('BUY');
+      selectChip('setup', 'Breakout');
+      selectChip('mistake', 'None');
+      document.getElementById('amount-container').style.display = 'block';
+      modal.showModal();
+    }
+  }
+
+  function setDirection(dir) {
+    currentDirection = dir;
+    document.getElementById('input-direction').value = dir;
+    const b = document.getElementById('btn-buy');
+    const s = document.getElementById('btn-sell');
+    if (dir === 'BUY') {
+      b.className = 'py-3 rounded-lg border border-win bg-win/10 text-win font-bold text-sm transition-all flex items-center justify-center gap-2';
+      s.className = 'py-3 rounded-lg border border-line bg-bg text-muted font-bold text-sm transition-all flex items-center justify-center gap-2';
+    } else {
+      s.className = 'py-3 rounded-lg border border-loss bg-loss/10 text-loss font-bold text-sm transition-all flex items-center justify-center gap-2';
+      b.className = 'py-3 rounded-lg border border-line bg-bg text-muted font-bold text-sm transition-all flex items-center justify-center gap-2';
+    }
+  }
+
+  function selectChip(type, val) {
+    if (type === 'setup') currentSetup = val;
+    if (type === 'mistake') currentMistake = val;
+    document.querySelectorAll(`#${type}-chips .chip`).forEach(c => {
+      if (c.innerText.trim() === val) c.classList.add('active-chip');
+      else c.classList.remove('active-chip');
+    });
+  }
+
+  document.getElementById('input-result').addEventListener('change', (e) => {
+    document.getElementById('amount-container').style.display = e.target.value === 'be' ? 'none' : 'block';
+  });
+
+  document.getElementById('trade-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const asset = document.getElementById('input-asset').value.toUpperCase().trim();
+    const date = document.getElementById('input-date').value;
+    const result = document.getElementById('input-result').value;
+    const amount = Math.abs(parseFloat(document.getElementById('input-amount').value) || 0);
+    const notesTxt = document.getElementById('input-notes').value.trim();
+
+    if (!asset || (result !== 'be' && !amount)) return alert('Please fill required fields');
+
+    let pnl = 0;
+    if (result === 'win') pnl = amount;
+    if (result === 'loss') pnl = -amount;
+
+    trades.push({ id: Date.now().toString(), date, asset, direction: currentDirection, result, pnl, setup: currentSetup, mistake: currentMistake, notes: notesTxt });
+    saveData();
+    toggleTradeModal();
+    renderDashboard();
+    if (document.getElementById('journal-page').classList.contains('flex')) renderJournal();
   });
 
   // --- Settings & Export ---
@@ -683,10 +597,9 @@
   });
 
   function clearAllData() {
-    if (confirm('WARNING: This will permanently delete all your trades, notes, and signals. Are you sure?')) {
-      trades = []; notes = {}; signals = [];
+    if (confirm('WARNING: This will permanently delete all your trades and notes. Are you sure?')) {
+      trades = []; notes = {};
       saveData();
-      localStorage.removeItem('gongola_signals');
       toggleSettings();
       renderDashboard();
     }
@@ -711,8 +624,7 @@
     localStorage.setItem('gongola_settings', JSON.stringify(settings));
   }
 
-
-  // --- Global Signals Logic (Supabase) ---
+  // --- Global Signals (Supabase) ---
   const SUPABASE_URL = 'https://usayycqwgdyklfzrinvc.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_aRLgeNmCRrvmOsW8d7YOlA_lEtVuGaE';
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
