@@ -745,6 +745,22 @@
     else { navigator.clipboard.writeText(text); alert('Signal copied!'); }
   }
 
+
+  function toggleGlobalSignalImage(id) {
+    const container = document.getElementById(`g-img-container-${id}`);
+    const text = document.getElementById(`g-img-text-${id}`);
+    const icon = document.getElementById(`g-img-icon-${id}`);
+    if (container.classList.contains('hidden')) {
+      container.classList.remove('hidden');
+      text.innerText = 'Hide Chart';
+      icon.style.transform = 'rotate(180deg)';
+    } else {
+      container.classList.add('hidden');
+      text.innerText = 'View Chart';
+      icon.style.transform = 'rotate(0deg)';
+    }
+  }
+
   function toggleGlobalSignalNotes(id) {
     const notesDiv = document.getElementById(`g-notes-${id}`);
     const btnText = document.getElementById(`g-btn-text-${id}`);
