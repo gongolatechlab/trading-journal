@@ -870,27 +870,39 @@
 
     const reader = new FileReader();
     reader.onload = async function(event) {
-      const base64Data = event.target.result;
-      
-      // Show Preview & Loading
-      document.getElementById('sig-image-preview').src = base64Data;
-      document.getElementById('sig-image-preview-container').classList.remove('hidden');
-      document.getElementById('sig-image-loading').classList.remove('hidden');
-      document.getElementById('sig-image-loading').classList.add('flex');
-      
-      // Clear notes and show AI writing
-      const notesArea = document.getElementById('sig-notes');
-      notesArea.value = "🤖 AI is reading the chart structure...";
-      notesArea.disabled = true;
+      const img = new Image();
+      img.onload = async function() {
+        // Compress Image
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const scale = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // Convert to Base64 (JPEG at 70% quality)
+        const base64Data = canvas.toDataURL('image/jpeg', 0.7);
 
-      try {
-        const res = await fetch(AI_ENDPOINT, {
-          method: 'POST',
-          body: JSON.stringify({ 
-            action: 'analyze_chart', 
-            image: base64Data 
-          })
-        });
+        // Show Preview & Loading
+        document.getElementById('sig-image-preview').src = base64Data;
+        document.getElementById('sig-image-preview-container').classList.remove('hidden');
+        document.getElementById('sig-image-loading').classList.remove('hidden');
+        document.getElementById('sig-image-loading').classList.add('flex');
+        
+        // Clear notes and show AI writing
+        const notesArea = document.getElementById('sig-notes');
+        notesArea.value = "🤖 AI is reading the chart structure...";
+        notesArea.disabled = true;
+
+        try {
+          const res = await fetch(AI_ENDPOINT, {
+            method: 'POST',
+            body: JSON.stringify({ 
+              action: 'analyze_chart', 
+              image: base64Data 
+            })
+          });
         
         const data = await res.json();
         
