@@ -853,7 +853,7 @@
           }
         } catch (err) {
           console.error(err);
-          notesArea.value = "Failed to analyze image. Please type your notes manually.";
+          notesArea.value = "Error: " + err.message;
         } finally {
           notesArea.disabled = false;
           document.getElementById('sig-image-loading').classList.add('hidden');
