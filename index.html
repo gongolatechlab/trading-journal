@@ -391,17 +391,25 @@
   }
 
   function toggleGlobalTab(id, tab, btn) {
+    var target = document.getElementById('g-panel-' + tab + '-' + id);
+    if (!target) return;
+    var wasOpen = !target.classList.contains('hidden');
+
     ['chart', 'analysis'].forEach(function(t) {
       var el = document.getElementById('g-panel-' + t + '-' + id);
-      if (el) el.classList.toggle('hidden', t !== tab);
+      if (el) el.classList.add('hidden');
     });
     var parent = btn.parentElement;
     parent.querySelectorAll('.tab-btn').forEach(function(b) {
       b.classList.remove('text-white', 'border-accent');
       b.classList.add('text-muted', 'border-transparent');
     });
-    btn.classList.remove('text-muted', 'border-transparent');
-    btn.classList.add('text-white', 'border-accent');
+
+    if (!wasOpen) {
+      target.classList.remove('hidden');
+      btn.classList.remove('text-muted', 'border-transparent');
+      btn.classList.add('text-white', 'border-accent');
+    }
   }
 
   function copyGlobalTrade(symbol, direction, entry, sl, tp, rr) {
