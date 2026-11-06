@@ -448,9 +448,31 @@
             renderEquityCurve();
         };
 
+        // Handle Import from URL
+        function checkUrlImport() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const asset = urlParams.get('asset');
+            const dir = urlParams.get('dir');
+            const entry = urlParams.get('entry');
+
+            if (asset && dir && entry) {
+                // Pre-fill the modal
+                document.getElementById('log-asset').value = asset;
+                document.getElementById('log-direction').value = dir;
+                document.getElementById('log-entry').value = entry;
+                
+                // Open the modal
+                toggleLogModal();
+
+                // Clear the URL parameters so it doesn't reopen on refresh
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
         // Init
         loadSettings();
         renderPersonalJournal();
+        checkUrlImport();
     </script>
 </body>
 </html>
