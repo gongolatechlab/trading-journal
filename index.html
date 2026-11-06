@@ -32,6 +32,28 @@
         </div>
     </header>
 
+    <!-- Equity Curve Chart -->
+    <div id="equity-chart-container" class="hidden mb-6 glass-card p-4">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Equity Curve (Cumulative Points)</h3>
+        <div class="relative w-full h-24">
+            <svg id="equity-svg" viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full overflow-visible">
+                <defs>
+                    <linearGradient id="line-gradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#22e58f" stop-opacity="0.4" />
+                        <stop offset="100%" stop-color="#22e58f" stop-opacity="0" />
+                    </linearGradient>
+                </defs>
+                <path id="equity-area" fill="url(#line-gradient)" d="" />
+                <polyline id="equity-line" fill="none" stroke="#22e58f" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" points="" />
+            </svg>
+            <div id="equity-zero-line" class="absolute top-1/2 left-0 right-0 border-t border-gray-700 border-dashed"></div>
+        </div>
+        <div class="flex justify-between text-[10px] text-gray-500 mt-2">
+            <span>Oldest</span>
+            <span>Latest</span>
+        </div>
+    </div>
+
     <!-- Machine Performance Button -->
     <button onclick="toggleMachinePerformance()" class="w-full mb-6 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-bold text-lg rounded-xl btn-glow transition-all active:scale-95 flex justify-center items-center gap-2">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -356,6 +378,75 @@
                 renderPersonalJournal();
             }
         }
+
+        function renderEquityCurve() {
+            let myTrades = JSON.parse(localStorage.getItem('myTrades') || '[]');
+            const container = document.getElementById('equity-chart-container');
+            
+            if (myTrades.length < 2) {
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+
+            // Reverse to show chronological order (oldest to newest)
+            const chronoTrades = [...myTrades].reverse();
+            
+            let cumPoints = [0];
+            let currentSum = 0;
+            chronoTrades.forEach(t => {
+                currentSum += t.points;
+                cumPoints.push(currentSum);
+            });
+
+            const max = Math.max(...cumPoints);
+            const min = Math.min(...cumPoints);
+            const range = Math.max(max - min, 10); // Minimum range of 10 to avoid flatlines
+
+            const width = 100;
+            const height = 100;
+            
+            let pointsStr = "";
+            let areaStr = `M 0 ${height - ((0 - min) / range) * height} `;
+
+            cumPoints.forEach((val, i) => {
+                const x = (i / (cumPoints.length - 1)) * width;
+                // Flip Y so higher points are at the top
+                const y = height - ((val - min) / range) * height;
+                
+                if (i === 0) pointsStr += `${x},${y} `;
+                else pointsStr += `${x},${y} `;
+                
+                areaStr += `L ${x} ${y} `;
+            });
+
+            areaStr += `L ${width} ${height} L 0 ${height} Z`;
+
+            document.getElementById('equity-line').setAttribute('points', pointsStr);
+            document.getElementById('equity-area').setAttribute('d', areaStr);
+
+            // Adjust zero line position
+            const zeroLine = document.getElementById('equity-zero-line');
+            if (min < 0 && max > 0) {
+                const zeroY = height - ((0 - min) / range) * height;
+                zeroLine.style.top = zeroY + '%';
+                zeroLine.style.display = 'block';
+            } else {
+                zeroLine.style.display = 'none';
+            }
+
+            // Change color based on last point
+            const isPositive = cumPoints[cumPoints.length - 1] >= 0;
+            const lineColor = isPositive ? '#22e58f' : '#ff4d4d';
+            document.getElementById('equity-line').setAttribute('stroke', lineColor);
+        }
+
+        // Modify existing renderPersonalJournal to call renderEquityCurve
+        const oldRenderFunc = renderPersonalJournal;
+        renderPersonalJournal = function() {
+            oldRenderFunc();
+            renderEquityCurve();
+        };
 
         // Init
         loadSettings();
