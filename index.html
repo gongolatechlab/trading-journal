@@ -449,5 +449,24 @@
         renderPersonalJournal();
         checkUrlImport();
     </script>
+<!-- KILL SERVICE WORKER -->
+    <script>
+      (async () => {
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          let unregistered = false;
+          for (const reg of regs) {
+            if (await reg.unregister()) unregistered = true;
+          }
+          const keys = await caches.keys();
+          for (const k of keys) await caches.delete(k);
+          if (unregistered && !sessionStorage.getItem('__killed_sw')) {
+            sessionStorage.setItem('__killed_sw', '1');
+            location.reload(true);
+          }
+        } catch (e) { console.error(e); }
+      })();
+    </script>
+
 </body>
 </html>
