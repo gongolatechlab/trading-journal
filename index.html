@@ -179,6 +179,19 @@
     </div>
 
     <script>
+        // --- SAFE STORAGE PARSER ---
+        function safeParse(key, defaultVal) {
+            try {
+                const item = localStorage.getItem(key);
+                if (!item) return defaultVal;
+                return JSON.parse(item);
+            } catch (e) {
+                console.warn("Corrupted storage for " + key + ", resetting.");
+                localStorage.removeItem(key);
+                return defaultVal;
+            }
+        }
+
         // --- MACHINE PERFORMANCE (Supabase) ---
         const supabaseUrl = 'https://usayycqwgdyklfzrinvc.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzYXl5Y3F3Z2R5a2xmenJpbnZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MTg5NjYsImV4cCI6MjEwOTE5NDk2Nn0.jgEo3bvyKK_ak1yMRILX-32tCrg8BKSlzDvu-ccDq3w';
@@ -234,7 +247,7 @@
 
         // --- PERSONAL JOURNAL ---
         function toggleLogModal() {
-            const settings = JSON.parse(localStorage.getItem('journalSettings') || '{}');
+            const settings = safeParse('journalSettings', {});
             if (settings.asset) document.getElementById('log-asset').value = settings.asset;
             document.getElementById('log-modal').classList.toggle('hidden');
         }
@@ -255,7 +268,7 @@
             }
 
             const trade = { id: Date.now(), asset, direction, result, entry, exit, points, notes };
-            let myTrades = JSON.parse(localStorage.getItem('myTrades') || '[]');
+            let myTrades = safeParse('myTrades', []);
             myTrades.unshift(trade);
             localStorage.setItem('myTrades', JSON.stringify(myTrades));
 
@@ -270,7 +283,7 @@
 
         function renderPersonalJournal() {
             const list = document.getElementById('my-trades-list');
-            let myTrades = JSON.parse(localStorage.getItem('myTrades') || '[]');
+            let myTrades = safeParse('myTrades', []);
 
             if (myTrades.length === 0) {
                 list.innerHTML = '<p class="text-center text-gray-400 py-8">No trades logged yet. Start journaling!</p>';
@@ -301,7 +314,7 @@
         }
 
         function deletePersonalTrade(id) {
-            let myTrades = JSON.parse(localStorage.getItem('myTrades') || '[]');
+            let myTrades = safeParse('myTrades', []);
             myTrades = myTrades.filter(t => t.id !== id);
             localStorage.setItem('myTrades', JSON.stringify(myTrades));
             renderPersonalJournal();
@@ -355,7 +368,7 @@
         }
 
         function loadSettings() {
-            const settings = JSON.parse(localStorage.getItem('journalSettings') || '{}');
+            const settings = safeParse('journalSettings', {});
             if (settings.name) {
                 document.getElementById('set-name').value = settings.name;
                 document.getElementById('header-title').innerText = settings.name + "'s Journal";
@@ -380,7 +393,7 @@
         }
 
         function exportCSV() {
-            let myTrades = JSON.parse(localStorage.getItem('myTrades') || '[]');
+            let myTrades = safeParse('myTrades', []);
             if (myTrades.length === 0) return alert("No trades to export.");
 
             const headers = "ID,Asset,Direction,Result,Entry,Exit,Points,Notes\n";
