@@ -10,26 +10,35 @@
         body { background-color: #0a0e13; color: #eef1fb; font-family: 'Inter', sans-serif; }
         .glass-card { background: linear-gradient(180deg, rgba(26,35,47,0.8) 0%, rgba(15,21,28,0.9) 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; }
         .btn-glow { box-shadow: 0 0 20px rgba(34, 229, 143, 0.3); }
+        input, select { font-family: inherit; }
     </style>
 </head>
 <body class="p-4 max-w-3xl mx-auto pb-20">
 
+    <!-- Header -->
     <header class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center font-bold text-black text-xl">J</div>
             <div>
-                <h1 class="text-xl font-bold">My Trading Journal</h1>
+                <h1 id="header-title" class="text-xl font-bold">My Trading Journal</h1>
                 <p class="text-xs text-gray-400">Gongola ICT Hub</p>
             </div>
         </div>
-        <a href="https://gongolatechlab.github.io/gongola-ict-hub/signals/" class="text-sm text-cyan-400">View Signals</a>
+        <div class="flex items-center gap-4">
+            <a href="https://gongolatechlab.github.io/gongola-ict-hub/signals/" class="text-sm text-cyan-400">Signals</a>
+            <button onclick="toggleSettings()" class="text-gray-400 hover:text-white transition-colors">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+            </button>
+        </div>
     </header>
 
+    <!-- Machine Performance Button -->
     <button onclick="toggleMachinePerformance()" class="w-full mb-6 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-bold text-lg rounded-xl btn-glow transition-all active:scale-95 flex justify-center items-center gap-2">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         Show Our Machine's Performance
     </button>
 
+    <!-- Machine Performance Dashboard -->
     <div id="machine-performance" class="hidden mb-6 glass-card p-6 border border-emerald-500/30">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-bold text-emerald-400">Gongola Algorithm Results</h2>
@@ -51,20 +60,18 @@
             </div>
         </div>
         
-        <div id="machine-trades" class="space-y-2 max-h-60 overflow-y-auto pr-1 text-sm">
-            <!-- Machine trades will load here -->
-        </div>
+        <div id="machine-trades" class="space-y-2 max-h-60 overflow-y-auto pr-1 text-sm"></div>
     </div>
 
+    <!-- Personal Journal Section -->
     <div class="flex justify-between items-end mb-3">
         <h3 class="text-md font-bold text-gray-400 uppercase tracking-wider">My Logged Trades</h3>
         <button onclick="toggleLogModal()" class="px-3 py-1 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white hover:border-emerald-400 transition-colors">+ Add Trade</button>
     </div>
 
-    <div id="my-trades-list" class="space-y-3">
-        <p class="text-center text-gray-400 py-8">No trades logged yet. Start journaling!</p>
-    </div>
+    <div id="my-trades-list" class="space-y-3"></div>
 
+    <!-- Log Trade Modal -->
     <div id="log-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
         <div class="glass-card p-6 w-full max-w-sm">
             <h2 class="text-xl font-bold mb-4">Log a Trade</h2>
@@ -107,7 +114,58 @@
         </div>
     </div>
 
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="glass-card p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Settings</h2>
+                <button onclick="toggleSettings()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            
+            <div class="space-y-5">
+                <!-- Profile -->
+                <div>
+                    <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Trader Profile</h3>
+                    <label class="text-[10px] text-gray-400">Your Name</label>
+                    <input type="text" id="set-name" placeholder="e.g. Hadi" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-white outline-none mb-2 focus:border-emerald-400">
+                    <label class="text-[10px] text-gray-400">Starting Balance ($)</label>
+                    <input type="number" id="set-balance" placeholder="1000" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-white outline-none focus:border-emerald-400">
+                </div>
+
+                <!-- Preferences -->
+                <div>
+                    <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Preferences</h3>
+                    <label class="text-[10px] text-gray-400">Default Asset</label>
+                    <input type="text" id="set-asset" placeholder="XAUUSD" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-white outline-none mb-2 focus:border-emerald-400">
+                    <label class="text-[10px] text-gray-400">Default Risk (%)</label>
+                    <input type="number" id="set-risk" placeholder="1" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-white outline-none focus:border-emerald-400">
+                </div>
+
+                <!-- Notifications -->
+                <div>
+                    <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Machine Alerts</h3>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="set-notify" class="w-4 h-4 accent-emerald-500">
+                        <span class="text-sm text-gray-300">Notify me on new signals</span>
+                    </label>
+                </div>
+
+                <!-- Data Management -->
+                <div class="pt-4 border-t border-gray-800">
+                    <h3 class="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">Danger Zone</h3>
+                    <div class="flex gap-2">
+                        <button onclick="exportCSV()" class="flex-1 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg text-sm font-bold">Export CSV</button>
+                        <button onclick="clearJournal()" class="flex-1 py-2 bg-red-900/50 border border-red-700 text-red-400 rounded-lg text-sm font-bold">Clear Data</button>
+                    </div>
+                </div>
+
+                <button onclick="saveSettings()" class="w-full py-3 bg-emerald-500 text-black rounded-lg font-bold text-lg mt-2">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // --- SUPABASE MACHINE PERFORMANCE ---
         const supabaseUrl = 'https://usayycqwgdyklfzrinvc.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzYXl5Y3F3Z2R5a2xmenJpbnZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MTg5NjYsImV4cCI6MjEwOTE5NDk2Nn0.jgEo3bvyKK_ak1yMRILX-32tCrg8BKSlzDvu-ccDq3w';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -160,7 +218,11 @@
             if (!el.classList.contains('hidden')) fetchMachinePerformance();
         }
 
+        // --- PERSONAL JOURNAL ---
         function toggleLogModal() {
+            // Pre-fill defaults from settings
+            const settings = JSON.parse(localStorage.getItem('journalSettings') || '{}');
+            if (settings.asset) document.getElementById('log-asset').value = settings.asset;
             document.getElementById('log-modal').classList.toggle('hidden');
         }
 
@@ -227,6 +289,69 @@
             renderPersonalJournal();
         }
 
+        // --- SETTINGS LOGIC ---
+        function toggleSettings() {
+            document.getElementById('settings-modal').classList.toggle('hidden');
+        }
+
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('journalSettings') || '{}');
+            if (settings.name) {
+                document.getElementById('set-name').value = settings.name;
+                document.getElementById('header-title').innerText = settings.name + "'s Journal";
+            }
+            if (settings.balance) document.getElementById('set-balance').value = settings.balance;
+            if (settings.asset) document.getElementById('set-asset').value = settings.asset;
+            if (settings.risk) document.getElementById('set-risk').value = settings.risk;
+            if (settings.notify) document.getElementById('set-notify').checked = settings.notify;
+        }
+
+        function saveSettings() {
+            const name = document.getElementById('set-name').value;
+            const balance = document.getElementById('set-balance').value;
+            const asset = document.getElementById('set-asset').value.toUpperCase();
+            const risk = document.getElementById('set-risk').value;
+            const notify = document.getElementById('set-notify').checked;
+
+            const settings = { name, balance, asset, risk, notify };
+            localStorage.setItem('journalSettings', JSON.stringify(settings));
+
+            if (name) document.getElementById('header-title').innerText = name + "'s Journal";
+
+            if (notify && "Notification" in window) {
+                Notification.requestPermission();
+            }
+
+            toggleSettings();
+            alert("Settings saved!");
+        }
+
+        function exportCSV() {
+            let myTrades = JSON.parse(localStorage.getItem('myTrades') || '[]');
+            if (myTrades.length === 0) return alert("No trades to export.");
+
+            const headers = "ID,Asset,Direction,Result,Entry,Exit,Points\n";
+            const rows = myTrades.map(t => 
+                `${t.id},${t.asset},${t.direction},${t.result},${t.entry},${t.exit},${t.points}`
+            ).join("\n");
+
+            const blob = new Blob([headers + rows], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'my_trading_journal.csv');
+            a.click();
+        }
+
+        function clearJournal() {
+            if (confirm("Are you sure? This will permanently delete all your logged trades.")) {
+                localStorage.removeItem('myTrades');
+                renderPersonalJournal();
+            }
+        }
+
+        // Init
+        loadSettings();
         renderPersonalJournal();
     </script>
 </body>
