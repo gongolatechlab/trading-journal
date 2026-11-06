@@ -19,6 +19,17 @@
 </head>
 <body class="p-4 max-w-3xl mx-auto pb-20">
 
+    <script>
+        window.onerror = function(msg, url, line) {
+            const errDiv = document.createElement('div');
+            errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;padding:15px;z-index:99999;font-family:monospace;font-size:14px;font-weight:bold;';
+            errDiv.innerText = 'SCRIPT ERROR: ' + msg + ' (Line ' + line + ')';
+            document.body.appendChild(errDiv);
+            return false;
+        };
+    </script>
+
+
     <header class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center font-bold text-black text-xl shadow-lg shadow-orange-500/20">J</div>
@@ -183,8 +194,9 @@
         function safeParse(key, defaultVal) {
             try {
                 const item = localStorage.getItem(key);
-                if (!item) return defaultVal;
-                return JSON.parse(item);
+                if (!item || item === 'null' || item === 'undefined') return defaultVal;
+                const parsed = JSON.parse(item);
+                return parsed || defaultVal;
             } catch (e) {
                 console.warn("Corrupted storage for " + key + ", resetting.");
                 localStorage.removeItem(key);
