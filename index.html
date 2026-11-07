@@ -40,6 +40,7 @@
         </div>
         <div class="flex items-center gap-4">
             <a href="https://gongolatechlab.github.io/gongola-ict-hub/glossary/" class="text-sm text-gray-400 hover:text-white transition-colors">Glossary</a>
+            <button onclick="toggleAuthModal()" id="auth-btn" class="text-sm font-bold text-cyan-400 bg-cyan-400/10 px-3 py-1 rounded-lg border border-cyan-400/30">Login</button>
             <a href="https://gongolatechlab.github.io/gongola-ict-hub/signals/" class="text-sm text-cyan-400 font-medium">Signals</a>
             <button onclick="toggleSettings()" class="text-gray-400 hover:text-white transition-colors p-1">
                 <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
@@ -155,7 +156,32 @@
         </div>
     </div>
 
-    <!-- SETTINGS MODAL -->
+    
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="hidden fixed inset-0 bg-black/80 z-[999] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="glass-card p-6 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="auth-title" class="text-xl font-bold">Login</h2>
+                <button onclick="toggleAuthModal()" class="text-gray-400 hover:text-white p-1">✕</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 mb-1 block">Email</label>
+                    <input type="email" id="auth-email" class="w-full bg-[#0f1627] border border-gray-700 rounded-lg p-3 text-white outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 mb-1 block">Password</label>
+                    <input type="password" id="auth-password" class="w-full bg-[#0f1627] border border-gray-700 rounded-lg p-3 text-white outline-none focus:border-emerald-400">
+                </div>
+                <button onclick="handleAuth()" id="auth-submit-btn" class="w-full py-3.5 bg-emerald-500 text-black rounded-xl font-bold shadow-lg shadow-emerald-500/30">Login</button>
+                <p class="text-center text-xs text-gray-400 mt-2">
+                    <span id="auth-toggle-text">Don't have an account?</span> <a href="#" onclick="toggleAuthMode(event)" id="auth-toggle-link" class="text-cyan-400 font-bold">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+<!-- SETTINGS MODAL -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-black/80 z-[999] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="glass-card p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
@@ -257,6 +283,101 @@
             if (!el.classList.contains('hidden')) fetchMachinePerformance();
         }
 
+        // --- AUTHENTICATION LOGIC ---
+        let isSignup = false;
+        let currentUser = null;
+
+        function toggleAuthModal() {
+            document.getElementById('auth-modal').classList.toggle('hidden');
+        }
+
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isSignup = !isSignup;
+            document.getElementById('auth-title').innerText = isSignup ? "Sign Up" : "Login";
+            document.getElementById('auth-submit-btn').innerText = isSignup ? "Create Account" : "Login";
+            document.getElementById('auth-toggle-text').innerText = isSignup ? "Already have an account?" : "Don't have an account?";
+            document.getElementById('auth-toggle-link').innerText = isSignup ? "Login" : "Sign up";
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const btn = document.getElementById('auth-submit-btn');
+            btn.innerText = "Processing...";
+
+            try {
+                if (isSignup) {
+                    const { data, error } = await supabase.auth.signUp({ email, password });
+                    if (error) throw error;
+                    alert("Account created! You can now login.");
+                    toggleAuthMode(new Event('click'));
+                } else {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    toggleAuthModal();
+                }
+            } catch (err) {
+                alert("Auth Error: " + err.message);
+            } finally {
+                btn.innerText = isSignup ? "Create Account" : "Login";
+            }
+        }
+
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            location.reload();
+        }
+
+        // Listen for Auth Changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                currentUser = session.user;
+                document.getElementById('auth-btn').innerText = "Logout";
+                document.getElementById('auth-btn').onclick = handleLogout;
+                document.getElementById('auth-btn').className = "text-sm font-bold text-red-400 bg-red-400/10 px-3 py-1 rounded-lg border border-red-400/30";
+                
+                // Check for migration
+                const localTrades = safeParse('myTrades', []);
+                if (localTrades.length > 0) {
+                    if (confirm("We found " + localTrades.length + " local trades. Do you want to sync them to your cloud account?")) {
+                        migrateLocalTrades(localTrades);
+                    }
+                } else {
+                    renderPersonalJournal();
+                }
+            } else {
+                currentUser = null;
+                document.getElementById('auth-btn').innerText = "Login";
+                document.getElementById('auth-btn').onclick = toggleAuthModal;
+                document.getElementById('auth-btn').className = "text-sm font-bold text-cyan-400 bg-cyan-400/10 px-3 py-1 rounded-lg border border-cyan-400/30";
+                document.getElementById('my-trades-list').innerHTML = '<p class="text-center text-gray-400 py-8">Please login to view your journal.</p>';
+                document.getElementById('equity-chart-container').classList.add('hidden');
+            }
+        });
+
+        async function migrateLocalTrades(trades) {
+            const formatted = trades.map(t => ({
+                user_id: currentUser.id,
+                asset: t.asset,
+                direction: t.direction,
+                result: t.result,
+                entry: t.entry,
+                exit: t.exit,
+                points: t.points,
+                notes: t.notes || ''
+            }));
+            
+            const { error } = await supabase.from('journal_trades').insert(formatted);
+            if (error) {
+                alert("Migration failed: " + error.message);
+            } else {
+                localStorage.removeItem('myTrades'); // Clear only after successful upload
+                alert("Trades synced successfully!");
+                renderPersonalJournal();
+            }
+        }
+
         // --- PERSONAL JOURNAL ---
         function toggleLogModal() {
             const settings = safeParse('journalSettings', {});
@@ -264,7 +385,7 @@
             document.getElementById('log-modal').classList.toggle('hidden');
         }
 
-        function savePersonalTrade() {
+        async function savePersonalTrade() {
             const asset = document.getElementById('log-asset').value.toUpperCase();
             const direction = document.getElementById('log-direction').value;
             const result = document.getElementById('log-result').value;
@@ -297,7 +418,7 @@
             const list = document.getElementById('my-trades-list');
             let myTrades = safeParse('myTrades', []);
 
-            if (myTrades.length === 0) {
+            if (!myTrades || myTrades.length === 0) {
                 list.innerHTML = '<p class="text-center text-gray-400 py-8">No trades logged yet. Start journaling!</p>';
                 return;
             }
