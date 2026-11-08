@@ -161,7 +161,7 @@
     <div id="auth-modal" class="hidden fixed inset-0 bg-black/80 z-[999] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="glass-card p-6 w-full max-w-sm">
             <div class="flex justify-between items-center mb-4">
-                <h2 id="auth-title" class="text-xl font-bold">Login</h2>
+                <h2 class="text-xl font-bold">Login</h2>
                 <button onclick="toggleAuthModal()" class="text-gray-400 hover:text-white p-1">✕</button>
             </div>
             <div class="space-y-4">
@@ -169,14 +169,8 @@
                     <label class="text-xs text-gray-400 mb-1 block">Email</label>
                     <input type="email" id="auth-email" class="w-full bg-[#0f1627] border border-gray-700 rounded-lg p-3 text-white outline-none focus:border-emerald-400">
                 </div>
-                <div>
-                    <label class="text-xs text-gray-400 mb-1 block">Password</label>
-                    <input type="password" id="auth-password" class="w-full bg-[#0f1627] border border-gray-700 rounded-lg p-3 text-white outline-none focus:border-emerald-400">
-                </div>
-                <button onclick="handleAuth()" id="auth-submit-btn" class="w-full py-3.5 bg-emerald-500 text-black rounded-xl font-bold shadow-lg shadow-emerald-500/30">Login</button>
-                <p class="text-center text-xs text-gray-400 mt-2">
-                    <span id="auth-toggle-text">Don't have an account?</span> <a href="#" onclick="toggleAuthMode(event)" id="auth-toggle-link" class="text-cyan-400 font-bold">Sign up</a>
-                </p>
+                <button onclick="handleAuth()" id="auth-submit-btn" class="w-full py-3.5 bg-emerald-500 text-black rounded-xl font-bold shadow-lg shadow-emerald-500/30 mt-2">Send Magic Link</button>
+                <p class="text-center text-[10px] text-gray-500 mt-2">We will email you a secure login link.</p>
             </div>
         </div>
     </div>
@@ -302,25 +296,23 @@
 
         async function handleAuth() {
             const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
             const btn = document.getElementById('auth-submit-btn');
-            btn.innerText = "Processing...";
-
+            
+            if (!email) return alert("Please enter your email.");
+            
+            btn.innerText = "Sending...";
             try {
-                if (isSignup) {
-                    const { data, error } = await sb.auth.signUp({ email, password });
-                    if (error) throw error;
-                    alert("Account created! You can now login.");
-                    toggleAuthMode(new Event('click'));
-                } else {
-                    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    toggleAuthModal();
-                }
+                const { error } = await sb.auth.signInWithOtp({ 
+                    email,
+                    options: { emailRedirectTo: window.location.href }
+                });
+                if (error) throw error;
+                alert("Magic link sent! Check your email to log in.");
+                toggleAuthModal();
             } catch (err) {
                 alert("Auth Error: " + err.message);
             } finally {
-                btn.innerText = isSignup ? "Create Account" : "Login";
+                btn.innerText = "Send Magic Link";
             }
         }
 
