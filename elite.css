@@ -1,0 +1,174 @@
+/* Gongola Journal | Elite UX/UI v1 — additive visual layer.
+   Existing journal analytics, authentication, and localStorage data are untouched. */
+html[data-journal-theme="obsidian"] {
+  color-scheme: dark;
+  --bg-main:#0d1015;--bg-surface:#151a20;--bg-card:#1a2027;
+  --bg-elevated:#202833;--primary:#d3aa66;--secondary:#d6aa65;
+  --positive:#52c59a;--negative:#f1787c;--text-main:#f3f0ea;
+  --text-muted:#a0a9b3;--border:#303841;
+  --gj-radius:12px;--gj-radius-lg:17px;--gj-ambient:rgba(211,170,102,.12);
+  --gj-card-highlight:rgba(255,255,255,.025);--gj-halo:rgba(211,170,102,.05);
+  --gj-on-primary:#17120c;--gj-letter-spacing:.015em;
+}
+html[data-journal-theme="midnight"] {
+  color-scheme:dark;
+  --bg-main:#071423;--bg-surface:#102136;--bg-card:#142b45;
+  --bg-elevated:#193654;--primary:#67b7ff;--secondary:#56d6ca;
+  --positive:#4cd3a5;--negative:#ff7b91;--text-main:#f0f7ff;
+  --text-muted:#99b1c9;--border:#29445d;
+  --gj-radius:19px;--gj-radius-lg:23px;--gj-ambient:rgba(103,183,255,.16);
+  --gj-card-highlight:rgba(116,195,255,.045);--gj-halo:rgba(44,121,198,.12);
+  --gj-on-primary:#062037;--gj-letter-spacing:0;
+}
+html[data-journal-theme="slate"] {
+  color-scheme:dark;
+  --bg-main:#101716;--bg-surface:#18211e;--bg-card:#1d2925;
+  --bg-elevated:#26332e;--primary:#9cceb0;--secondary:#c8b08e;
+  --positive:#9cceb0;--negative:#e48a86;--text-main:#eff3ef;
+  --text-muted:#a8b8ac;--border:#38463e;
+  --gj-radius:8px;--gj-radius-lg:11px;--gj-ambient:rgba(156,206,176,.08);
+  --gj-card-highlight:rgba(255,255,255,.016);--gj-halo:rgba(156,206,176,.025);
+  --gj-on-primary:#15231a;--gj-letter-spacing:.012em;
+}
+html[data-journal-theme] { background:var(--bg-main); }
+html[data-journal-theme] body {
+  background:radial-gradient(ellipse 100% 55% at 45% -10%,var(--gj-halo),transparent 65%),var(--bg-main);
+  color:var(--text-main);letter-spacing:var(--gj-letter-spacing);
+  -webkit-font-smoothing:antialiased;
+}
+html[data-journal-theme] :is(button,input,select,textarea,a):focus-visible {
+  outline:2px solid var(--primary);outline-offset:3px;
+}
+html[data-journal-theme] :is(button,a) { -webkit-tap-highlight-color:transparent; }
+html[data-journal-theme] button { cursor:pointer; }
+html[data-journal-theme] button:disabled { opacity:.48;cursor:not-allowed; }
+html[data-journal-theme] :is(.metric-card,.trade-card) {
+  border-radius:var(--gj-radius);background:linear-gradient(155deg,var(--gj-card-highlight),transparent 75%),var(--bg-card);
+  border:1px solid var(--border);box-shadow:0 6px 24px rgba(0,0,0,.09);
+  transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+html[data-journal-theme] .metric-card { min-height:110px;gap:6px; }
+html[data-journal-theme] .metric-card > span:first-child {
+  text-transform:uppercase;letter-spacing:.085em;font-size:10px;font-weight:650;
+}
+html[data-journal-theme] .metric-card .tabular-nums,
+html[data-journal-theme] .metric-card > span:last-child { letter-spacing:-.035em;line-height:1.1; }
+html[data-journal-theme] .trade-card { padding:16px 18px; }
+html[data-journal-theme] .view-section { animation:gjEnter .18s ease-out; }
+@keyframes gjEnter { from {opacity:.66;transform:translateY(4px)} to {opacity:1;transform:translateY(0)} }
+/* Desktop command rail */
+@media (min-width:768px) {
+  html[data-journal-theme] body > nav:first-of-type {
+    width:248px;min-width:248px;background:var(--bg-surface);
+    box-shadow:4px 0 25px rgba(0,0,0,.09);border-color:var(--border);
+  }
+  html[data-journal-theme] body > nav:first-of-type > div:first-child { margin-bottom:24px; }
+  html[data-journal-theme] body > nav:first-of-type .nav-btn {
+    border:1px solid transparent;border-radius:var(--gj-radius);min-height:42px;
+  }
+  html[data-journal-theme] body > nav:first-of-type .nav-btn.active {
+    background:var(--gj-ambient);border-color:var(--border);color:var(--primary)!important;
+  }
+  html[data-journal-theme] main > .view-section { max-width:1110px; }
+}
+/* Brand is intentionally restrained: the data, not decoration, stays in control. */
+html[data-journal-theme] .brand-mark,
+html[data-journal-theme] :is(header,nav) .font-bold.bg-\[var\(--primary\)\] {
+  color:var(--gj-on-primary)!important;
+}
+html[data-journal-theme] #view-dashboard > div:first-child h1 {
+  font-weight:730;letter-spacing:-.045em;font-size:clamp(26px,3vw,35px);
+}
+html[data-journal-theme] #view-dashboard > div:first-child p { max-width:380px;line-height:1.5; }
+html[data-journal-theme] #view-dashboard .metric-card:first-child {
+  border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--gj-ambient),0 10px 30px rgba(0,0,0,.09);
+}
+html[data-journal-theme] #view-dashboard > div:nth-child(3),
+html[data-journal-theme] #view-calendar > div:nth-child(2),
+html[data-journal-theme] #view-settings > div:nth-child(2) {
+  border-radius:var(--gj-radius-lg)!important;
+  box-shadow:0 12px 35px rgba(0,0,0,.11);
+}
+html[data-journal-theme] #equity-svg { overflow:hidden; }
+html[data-journal-theme] #view-trades .filter-btn {
+  min-height:37px;padding-inline:14px;transition:background .18s ease,color .18s ease;
+}
+html[data-journal-theme] #view-trades .filter-btn.active {
+  background:var(--gj-ambient)!important;color:var(--primary)!important;
+  border-color:var(--primary);
+}
+html[data-journal-theme] .cal-day { min-height:40px;border-radius:calc(var(--gj-radius) - 3px); }
+html[data-journal-theme] .cal-day.selected { outline:2px solid var(--primary);outline-offset:-2px;border:0; }
+html[data-journal-theme] .cal-day.has-win { color:var(--positive); }
+html[data-journal-theme] .cal-day.has-loss { color:var(--negative); }
+html[data-journal-theme] input,
+html[data-journal-theme] textarea,
+html[data-journal-theme] select { min-height:44px;border-radius:var(--gj-radius);background:var(--bg-main);border-color:var(--border); }
+html[data-journal-theme] input::placeholder,
+html[data-journal-theme] textarea::placeholder { color:var(--text-muted);opacity:.65; }
+html[data-journal-theme] #log-modal > div,
+html[data-journal-theme] #auth-modal > div,
+html[data-journal-theme] #machine-performance > div {
+  background:var(--bg-surface)!important;border-color:var(--border);
+  border-radius:var(--gj-radius-lg);
+  box-shadow:0 25px 70px rgba(0,0,0,.38);
+}
+html[data-journal-theme] button[class~="bg-[var(--primary)]"] { color:var(--gj-on-primary)!important; }
+html[data-journal-theme] .bottom-nav-item {
+  gap:3px;font-weight:620;letter-spacing:.015em;min-width:56px;min-height:49px;
+  border-radius:10px;position:relative;
+}
+html[data-journal-theme] .bottom-nav-item.active { color:var(--primary)!important; }
+html[data-journal-theme] .bottom-nav-item.active::before {
+  content:"";position:absolute;top:-7px;width:29px;height:2px;background:var(--primary);border-radius:9px;
+}
+html[data-journal-theme] #view-settings h1,
+html[data-journal-theme] #view-calendar h1,
+html[data-journal-theme] #view-trades h1 { letter-spacing:-.045em;font-weight:720; }
+html[data-journal-theme] #log-modal button,
+html[data-journal-theme] #auth-modal button { min-height:42px; }
+/* Theme picker: functional UI, not a screenshot or mockup. */
+.gj-design-panel { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--gj-radius-lg);padding:17px;margin-bottom:16px; }
+.gj-design-heading { display:flex;align-items:start;justify-content:space-between;gap:10px;margin-bottom:13px; }
+.gj-design-heading h2 { font-size:13px;font-weight:750;letter-spacing:.02em;color:var(--text-main); }
+.gj-design-heading p { color:var(--text-muted);font-size:11px;margin-top:3px;line-height:1.45; }
+.gj-design-heading .gj-tag { white-space:nowrap;color:var(--primary);border:1px solid var(--border);padding:4px 7px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:.08em; }
+.gj-theme-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px; }
+.gj-theme { text-align:left;min-height:100px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--gj-radius);padding:10px;transition:border-color .15s,transform .15s; }
+.gj-theme[aria-pressed="true"] { border-color:var(--primary);box-shadow:0 0 0 1px var(--primary); }
+.gj-theme-title { color:var(--text-main);font-size:11px;font-weight:760;margin-top:9px;line-height:1.25; }
+.gj-theme-sub { color:var(--text-muted);font-size:10px;margin-top:3px;line-height:1.35; }
+.gj-swatch { height:30px;border-radius:6px;display:flex;align-items:center;gap:4px;padding:6px; }
+.gj-swatch i { height:7px;border-radius:2px;display:block;flex:1; }
+.gj-swatch i:nth-child(2) { flex:2; }
+.gj-swatch--obsidian {background:#0d1015;border:1px solid #303841}.gj-swatch--obsidian i:nth-child(1){background:#d3aa66}.gj-swatch--obsidian i:nth-child(2){background:#303841}.gj-swatch--obsidian i:nth-child(3){background:#52c59a}
+.gj-swatch--midnight {background:#071423;border:1px solid #29445d}.gj-swatch--midnight i:nth-child(1){background:#67b7ff}.gj-swatch--midnight i:nth-child(2){background:#244563}.gj-swatch--midnight i:nth-child(3){background:#56d6ca}
+.gj-swatch--slate {background:#101716;border:1px solid #38463e}.gj-swatch--slate i:nth-child(1){background:#9cceb0}.gj-swatch--slate i:nth-child(2){background:#38463e}.gj-swatch--slate i:nth-child(3){background:#c8b08e}
+/* Compact design switch lives in desktop sidebar for quick exploration. */
+.gj-sidebar-label {font-size:10px;color:var(--text-muted);letter-spacing:.11em;text-transform:uppercase;font-weight:760;margin-bottom:9px;padding:0 5px}
+.gj-sidebar-picker { display:flex;gap:5px; }
+.gj-sidebar-picker button {flex:1;min-height:31px;padding:6px 5px;border:1px solid var(--border);background:var(--bg-card);font-size:10px;font-weight:700;color:var(--text-muted);border-radius:7px; }
+.gj-sidebar-picker button[aria-pressed="true"] {color:var(--primary);border-color:var(--primary);background:var(--gj-ambient);}
+@media (max-width:767px) {
+  html[data-journal-theme] body { min-height:100dvh;height:100dvh; }
+  html[data-journal-theme] body header {
+    min-height:61px;background:var(--bg-surface);border-bottom:1px solid var(--border);
+    padding-left:15px;padding-right:15px;
+  }
+  html[data-journal-theme] body header > div:first-child span {letter-spacing:-.025em;}
+  html[data-journal-theme] body > div.flex-1 > nav {
+    background:var(--bg-surface);border-top:1px solid var(--border);padding:9px 8px calc(7px + env(safe-area-inset-bottom));
+    box-shadow:0 -8px 24px rgba(0,0,0,.12);
+  }
+  html[data-journal-theme] #view-dashboard,
+  html[data-journal-theme] #view-calendar,
+  html[data-journal-theme] #view-trades,
+  html[data-journal-theme] #view-settings {padding:20px 15px 26px;}
+  html[data-journal-theme] .metric-card {padding:15px;min-height:102px;}
+  html[data-journal-theme] #view-dashboard > div:first-child {align-items:start;}
+  html[data-journal-theme] #view-dashboard > div:first-child h1 {font-size:29px;}
+  html[data-journal-theme] #log-modal > div {border-radius:20px 20px 0 0;max-height:92dvh;padding-bottom:calc(18px + env(safe-area-inset-bottom));}
+  html[data-journal-theme] #log-modal > div > div:nth-child(2) {max-height:65dvh;}
+}
+@media (max-width:355px) { .gj-theme-grid {gap:6px}.gj-theme {padding:7px}.gj-theme-title{font-size:10px}.gj-theme-sub{font-size:9px} }
+@media (prefers-reduced-motion:reduce){ html[data-journal-theme] * {animation:none!important;transition:none!important;scroll-behavior:auto!important} }
