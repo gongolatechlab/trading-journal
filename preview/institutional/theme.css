@@ -1,0 +1,23 @@
+/* Institutional Journal — additive theme; existing handlers and storage keys remain unchanged. */
+html[data-journal-theme="obsidian"]{
+ --bg-main:#07131e;--bg-surface:#091d28;--bg-card:#0c2530;--bg-elevated:#143440;
+ --primary:#c9a66b;--secondary:#7dbcd9;--positive:#26c6a2;--negative:#e46878;
+ --text-main:#e5eef2;--text-muted:#9bb2be;--border:#31505d;
+ --gj-radius:10px;--gj-radius-lg:13px;--gj-ambient:#c9a66b22;--gj-card-highlight:#26c6a208;--gj-halo:#26c6a212;--gj-on-primary:#07131e;
+}
+html[data-journal-theme="obsidian"] body{background:radial-gradient(ellipse at 80% 0%,#103743,transparent 42%),#07131e}
+html[data-journal-theme="obsidian"] body header{background:#05121b url('./gongola-wave.svg') center bottom/100% 100% no-repeat!important;border-bottom-color:#8b7146!important;min-height:66px}
+html[data-journal-theme="obsidian"] body>nav:first-of-type{background:linear-gradient(170deg,#0c2630,#07131e);border-right-color:#80683f}
+html[data-journal-theme="obsidian"] body>nav:first-of-type>div:first-child{background:url('./gongola-wave.svg') center bottom/100% 100% no-repeat;padding:9px 4px 22px;border-bottom:1px solid #80683f}
+html[data-journal-theme="obsidian"] .nav-btn.active{background:linear-gradient(145deg,#372e20,#102631)!important;border-color:#b39155!important;color:#f0d093!important}
+html[data-journal-theme="obsidian"] :is(.metric-card,.trade-card,.gj-workflow-card,.gj-today-bar,.gj-design-panel){background:linear-gradient(145deg,#0d2a35,#091923);border-color:#3e5b66;box-shadow:0 8px 25px #0002}
+html[data-journal-theme="obsidian"] #view-dashboard .metric-card:first-child{border-color:#b39155}
+html[data-journal-theme="obsidian"] .gj-btn--primary{background:linear-gradient(135deg,#c9a66b,#e4c892);border-color:#e8c98c}
+html[data-journal-theme="obsidian"] .gj-swatch--obsidian{background:#07131e;border-color:#31505d}
+html[data-journal-theme="obsidian"] .gj-swatch--obsidian i:nth-child(1){background:#c9a66b}
+html[data-journal-theme="obsidian"] .gj-swatch--obsidian i:nth-child(2){background:#31505d}
+html[data-journal-theme="obsidian"] .gj-swatch--obsidian i:nth-child(3){background:#26c6a2}
+html[data-journal-theme="obsidian"] #view-dashboard>div:first-child{padding:12px 12px 18px;border:1px solid #80683f;border-radius:12px;background:#091d28 url('./gongola-wave.svg') center bottom/100% 100% no-repeat}
+html[data-journal-theme="obsidian"] nav.md\:hidden{background:#091d28;border-color:#80683f}
+html[data-journal-theme="obsidian"] .bottom-nav-item.active{border:1px solid #b39155}
+@media(max-width:767px){html[data-journal-theme="obsidian"] #view-dashboard>div:first-child{padding:10px 10px 14px}html[data-journal-theme="obsidian"] .metric-card{min-height:90px}}
